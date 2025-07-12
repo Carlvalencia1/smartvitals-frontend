@@ -1,0 +1,96 @@
+:host ::ng-deep .p-card {
+  box-shadow: 0 2px 1px -1px rgba(0,0,0,.2), 0 1px 1px 0 rgba(0,0,0,.14), 0 1px 3px 0 rgba(0,0,0,.12);
+  border-radius: 4px;
+}
+
+:host ::ng-deep .p-card .p-card-title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+:host ::ng-deep .p-card .p-card-subtitle {
+  font-weight: 400;
+  margin-bottom: 1.5rem;
+  color: var(--text-color-secondary);
+}
+
+:host ::ng-deep .p-inputtext {
+  width: 100%;
+  padding: 0.5rem;
+}
+
+:host ::ng-deep .p-dropdown {
+  width: 100%;
+}
+
+:host ::ng-deep .p-avatar {
+  width: 100px;
+  height: 100px;
+}
+
+:host ::ng-deep .p-fileupload-buttonbar {
+  background: transparent;
+  border: none;
+  padding: 0;
+}
+
+:host ::ng-deep .p-button {
+  margin-right: 0.5rem;
+}
+
+.profile-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 2rem;
+}
+
+.profile-form {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.profile-image-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  padding: 2rem 0;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.form-field.full-width {
+  grid-column: 1 / -1;
+}
+
+.form-actions {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .form-actions {
+    flex-direction: column;
+  }
+}

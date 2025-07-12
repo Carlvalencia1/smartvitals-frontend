@@ -2,11 +2,12 @@ import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { User } from '../features/user/models/user';
 import { Observable } from 'rxjs';
-import { environment } from '../../environments/environment'; 
+import { environment } from '../../environments/environment';
 
 @Injectable({ providedIn: 'root' })
 export class AuthService {
-  private apiUrl = environment.API_URL; 
+  private apiUrl = environment.API_URL;
+  private user !: User
   private isLoggedIn = false;
   private options = {
     headers: {
@@ -30,11 +31,20 @@ export class AuthService {
     localStorage.setItem('user', JSON.stringify(user));
     this.setLoggedIn(true);
     this.setToken(user.access_token ?? '');
+    this.user = user;
   }
 
-  getUser(): User | null {
+  getUser(): User {
+    if (this.user) {
+      return this.user;
+    }
     const user = localStorage.getItem('user');
-    return user ? JSON.parse(user) : null;
+    if (user) {
+      this.user = JSON.parse(user);
+      return this.user;
+    }
+
+    return {} as User; // Return an empty User object if no user is found
   }
 
   isLogged(): boolean {

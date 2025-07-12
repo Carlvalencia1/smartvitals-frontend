@@ -85,9 +85,18 @@
         <div>
           <h1 class="text-xl font-bold mb-1">Sistema de Monitoreo Médico</h1>
           <div class="text-sm space-y-1">
-            <p><strong>Paciente:</strong> {{currentUser.name}} {{currentUser.lastname}}</p>
-            <p><strong>No. Paciente:</strong> #{{ currentPatientId }}</p>
-            <p><strong>Edad:</strong> 24</p>
+            <div *ngIf="currentUser.role === 'patient'">
+              <p><strong>Paciente:</strong> {{currentUser.name}} {{currentUser.lastname}}</p>
+              <p><strong>No. Paciente:</strong> #{{ currentUserId }}</p>
+              <p><strong>Edad:</strong> 24</p>
+            </div>
+            <div *ngIf="currentUser.role === 'doctor'">
+              <p><strong>Doctor:</strong> {{currentUser.name}} {{currentUser.lastname}}</p>
+              <!-- Obtenemos la lista de pacientes del doctor -->
+              <p-select [options]="patientOptions" [(ngModel)]="selectedPatient" placeholder="Seleccionar paciente"
+                styleClass="w-full border border-gray-300 rounded" optionLabel="label">
+              </p-select>
+            </div>
           </div>
         </div>
         <div class="flex flex-col gap-2">

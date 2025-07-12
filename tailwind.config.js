@@ -7,4 +7,7 @@ module.exports = {
     extend: {},
   },
   plugins: [],
+  corePlugins: {
+    preflight: false, // Esto evita que Tailwind normalice algunos estilos que pueden afectar a PrimeNG
+  },
 }

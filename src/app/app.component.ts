@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { PrimeNG } from 'primeng/config';
 
 @Component({
   selector: 'app-root',
@@ -8,6 +9,14 @@ import { RouterOutlet } from '@angular/router';
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
-export class AppComponent {
+export class AppComponent implements OnInit {
   title = 'front-evotek';
+
+  constructor(private primeNG: PrimeNG) { }
+
+  ngOnInit() {
+
+    this.primeNG.ripple.set(true);
+
+  }
 }

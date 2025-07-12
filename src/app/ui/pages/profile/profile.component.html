@@ -1,0 +1,112 @@
+<div class="profile-container">
+  <p-toast></p-toast>
+  
+  <p-card header="Mi Perfil" subheader="Actualiza tu información personal">
+    <form [formGroup]="profileForm" (ngSubmit)="onSubmit()" class="profile-form">
+      
+      <!-- Foto de perfil -->
+      <div class="profile-image-section">
+        <div class="current-image">
+          <p-avatar 
+            [image]="profileImageUrl || '/assets/default-avatar.png'" 
+            size="xlarge" 
+            shape="circle">
+          </p-avatar>
+        </div>
+        
+        <div class="image-upload">
+          <p-fileUpload 
+            mode="basic" 
+            chooseLabel="Cambiar foto"
+            accept="image/*"
+            maxFileSize="1000000"
+            (onSelect)="onFileSelect($event)"
+            [auto]="true"
+            chooseIcon="pi pi-camera">
+          </p-fileUpload>
+        </div>
+      </div>
+
+      <!-- Información personal -->
+      <div class="form-grid">
+        
+        <!-- Nombre -->
+        <div class="form-field">
+          <label for="name">Nombre *</label>
+          <input 
+            pInputText 
+            id="name" 
+            formControlName="name"
+            [class.ng-invalid]="isFieldInvalid('name')"
+            placeholder="Ingresa tu nombre">
+          <small class="p-error" *ngIf="isFieldInvalid('name')">
+            {{ getFieldError('name') }}
+          </small>
+        </div>
+
+        <!-- Apellido -->
+        <div class="form-field">
+          <label for="lastname">Apellido *</label>
+          <input 
+            pInputText 
+            id="lastname" 
+            formControlName="lastname"
+            [class.ng-invalid]="isFieldInvalid('lastname')"
+            placeholder="Ingresa tu apellido">
+          <small class="p-error" *ngIf="isFieldInvalid('lastname')">
+            {{ getFieldError('lastname') }}
+          </small>
+        </div>
+
+        <!-- Email -->
+        <div class="form-field full-width">
+          <label for="email">Correo electrónico *</label>
+          <input 
+            pInputText 
+            id="email" 
+            formControlName="email"
+            [class.ng-invalid]="isFieldInvalid('email')"
+            placeholder="correo@ejemplo.com">
+          <small class="p-error" *ngIf="isFieldInvalid('email')">
+            {{ getFieldError('email') }}
+          </small>
+        </div>
+
+        <!-- Rol -->
+        <div class="form-field full-width">
+          <label for="role">Rol *</label>
+          <p-dropdown 
+            id="role"
+            formControlName="role"
+            [options]="roleOptions"
+            placeholder="Selecciona un rol"
+            [class.ng-invalid]="isFieldInvalid('role')">
+          </p-dropdown>
+          <small class="p-error" *ngIf="isFieldInvalid('role')">
+            {{ getFieldError('role') }}
+          </small>
+        </div>
+
+      </div>
+
+      <!-- Botones -->
+      <div class="form-actions">
+        <p-button 
+          type="submit" 
+          label="Guardar cambios"
+          icon="pi pi-check"
+          [disabled]="profileForm.invalid">
+        </p-button>
+        
+        <p-button 
+          type="button" 
+          label="Cancelar"
+          icon="pi pi-times"
+          severity="secondary"
+          (onClick)="loadUserData()">
+        </p-button>
+      </div>
+
+    </form>
+  </p-card>
+</div>

@@ -5,14 +5,14 @@ import { UserService } from '../../../features/user/user.service';
 import { User } from '../../../features/user/models/user';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { SidebarModule } from 'primeng/sidebar';
+// import { SidebarModule } from 'primeng/sidebar';
 import { ButtonModule } from 'primeng/button';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule, FormsModule, SidebarModule, ButtonModule, RouterLink, RouterLinkActive],
+  imports: [CommonModule, FormsModule, ButtonModule, RouterLink, RouterLinkActive],
   templateUrl: './navbar.component.html',
   styleUrl: './navbar.component.css'
 })
@@ -43,7 +43,7 @@ export class NavbarComponent implements OnInit {
   }
 
   get profileImageUrl(): string {
-    return this.user.profile_picture || 'assets/profile-placeholder.png';
+    return this.user.profile_picture;
   }
 
   get userFullName(): string {
@@ -68,14 +68,14 @@ export class NavbarComponent implements OnInit {
   @Output() searchEvent = new EventEmitter<string>();
 
   editProfile() {
-    this.router.navigate(['/editprofile']);
+    this.router.navigate(['/profile']);
     this.menuOpen = false;
     this.sidebarVisible = false;
   }
 
   logout() {
     this.authService.logout();
-    this.router.navigate(['/login']);
+    this.router.navigate(['/']);
     this.menuOpen = false;
     this.sidebarVisible = false;
   }

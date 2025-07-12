@@ -1,0 +1,20 @@
+/* Estilos para la barra de navegación */
+.pi {
+  color: white;
+}
+
+/* Aseguramos que los iconos en el menú desplegable sean oscuros */
+.bg-white .pi {
+  color: #333;
+}
+
+/* Para mantener el color de los iconos en la barra inferior móvil */
+.fixed.bottom-0 .pi {
+  color: #4695BD; /* Color azul para los iconos del menú móvil */
+}
+
+/* Efectos hover */
+.nav-icon:hover .pi {
+  color: rgba(255, 255, 255, 0.8);
+}
+

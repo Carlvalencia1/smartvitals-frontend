@@ -10,11 +10,15 @@ import { SensorData } from '../../../features/sensor/models/sensorData';
 import { AlertData } from '../../../features/sensor/models/alert-data';
 import { WebSocketMessage } from '../../../features/sensor/models/websocket-message';
 import { User } from '../../../features/user/models/user';
+import { UserService } from '../../../features/user/user.service';
+import { FormsModule } from '@angular/forms';
+import { SelectModule } from 'primeng/select';
+
 
 @Component({
   selector: 'app-panel',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, CardsComponent, ChartModule],
+  imports: [CommonModule, NavbarComponent, CardsComponent, ChartModule, SelectModule, FormsModule],
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.css']
 })
@@ -23,9 +27,12 @@ export class PanelComponent implements OnInit, OnDestroy {
   currentUser = {} as User
   isConnected = false;
   isMonitoring = false;
-  currentPatientId: number = 0;
+  currentUserId: number = 0;
   alerts: AlertData[] = [];
   sensorStatus: any = null;
+  patients: User[] = [];
+  patientOptions: any[] = [];
+  selectedPatient: User | undefined;
 
   // Datos en tiempo real (inicialmente vacíos)
   realTimeData = {
@@ -173,16 +180,34 @@ export class PanelComponent implements OnInit, OnDestroy {
 
   constructor(
     private websocketService: WebsocketService,
-    private authService: AuthService
+    private authService: AuthService,
+    private userService: UserService
   ) { }
 
   ngOnInit() {
-    this.currentPatientId = this.authService.getUser()?.id || 0;
-    if (!this.currentPatientId) {
+    this.currentUserId = this.authService.getUser()?.id || 0;
+    if (!this.currentUserId) {
       console.error('No se pudo obtener el ID del paciente actual');
       return;
     }
+    
     this.currentUser = this.authService.getUser() || {} as User;
+
+    // Obtener pacientes si el usuario es doctor
+    if (this.currentUser.role === 'doctor' && this.currentUser.id !== undefined) {
+      this.userService.getPatients(this.currentUser.id).subscribe({
+        next: (data) => {
+          this.patients = data;
+          this.patientOptions = data.map(patient => ({
+            label: `${patient.name} ${patient.lastname}`,
+            value: patient
+          }));
+        },
+        error: (error) => {
+          console.error('Error fetching patients:', error);
+        }
+      });
+    }
     // Conectar al WebSocket
     this.websocketService.connect();
 
@@ -247,7 +272,7 @@ export class PanelComponent implements OnInit, OnDestroy {
 
   startMonitoring() {
     if (this.isConnected) {
-      this.websocketService.startMeasurement(this.currentPatientId);
+      this.websocketService.startMeasurement(this.currentUserId);
       console.log('Monitoreo iniciado');
     } else {
       console.error('WebSocket no está conectado');
@@ -256,7 +281,7 @@ export class PanelComponent implements OnInit, OnDestroy {
 
   stopMonitoring() {
     if (this.isConnected) {
-      this.websocketService.stopMeasurement(this.currentPatientId);
+      this.websocketService.stopMeasurement(this.currentUserId);
       console.log('Monitoreo detenido');
     } else {
       console.error('WebSocket no está conectado');

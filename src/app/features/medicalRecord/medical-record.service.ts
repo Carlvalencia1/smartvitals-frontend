@@ -28,4 +28,69 @@ export class MedicalRecordService {
       }
     });
   }
+
+  getPatientMedicalRecordsByRange(patient_id: number, startDate: string, endDate: string): Observable<Record[]> {
+    return this.http.get<Record[]>(`${this.apiUrl}/patients/${patient_id}/medicalRecords/range`, {
+      params: {
+        startDate: startDate,
+        endDate: endDate
+      },
+      headers: {
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
+  getDoctorMedicalRecordsByRange(doctor_id: number, startDate: string, endDate: string): Observable<Record[]> {
+    return this.http.get<Record[]>(`${this.apiUrl}/doctors/${doctor_id}/medicalRecords/range`, {
+      params: {
+        startDate: startDate,
+        endDate: endDate
+      },
+      headers: {
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
+  getDoctorStatistics(doctor_id: number): Observable<Record[]> {
+    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${doctor_id}/patients`, {
+      headers: {
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
+  getPatientStatistics(patient_id: number): Observable<Record[]> {
+    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${patient_id}`, {
+      headers: {
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
+  getDoctorStatisticsByRange(doctor_id: number, startDate: string, endDate: string): Observable<Record[]> {
+    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${doctor_id}/patients/range`, {
+      params: {
+        startDate: startDate,
+        endDate: endDate
+      },
+      headers: {
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
+  getPatientStatisticsByRange(patient_id: number, startDate: string, endDate: string): Observable<Record[]> {
+    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${patient_id}/range`, {
+      params: {
+        startDate: startDate,
+        endDate: endDate
+      },
+      headers: {
+        'Authorization': `Bearer ${this.authService.getToken()}`
+      }
+    });
+  }
+
 }
