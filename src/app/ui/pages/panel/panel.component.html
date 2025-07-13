@@ -49,7 +49,7 @@
 
       <!-- Botones de control -->
       <div class="mt-3 space-y-2">
-        <button (click)="startMonitoring()" [disabled]="!isConnected || isMonitoring"
+        <button (click)="startMonitoring()" [disabled]="!canStartMonitoring"
           class="w-full bg-green-500 text-white px-3 py-1 rounded text-sm hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
           {{ isMonitoring ? 'Monitoreando...' : 'Iniciar Monitoreo' }}
         </button>
@@ -94,18 +94,19 @@
               <p><strong>Doctor:</strong> {{currentUser.name}} {{currentUser.lastname}}</p>
               <!-- Obtenemos la lista de pacientes del doctor -->
               <p-select [options]="patientOptions" [(ngModel)]="selectedPatient" placeholder="Seleccionar paciente"
-                styleClass="w-full border border-gray-300 rounded" optionLabel="label">
+                styleClass="w-full border border-gray-300 rounded" optionLabel="label"
+                (ngModelChange)="onPatientSelectionChange()">
               </p-select>
             </div>
           </div>
         </div>
         <div class="flex flex-col gap-2">
-          <button (click)="startMonitoring()" [disabled]="!isConnected || isMonitoring"
+          <button (click)="startMonitoring()" [disabled]="!canStartMonitoring"
             class="bg-green-500 text-white px-4 py-1 rounded-lg shadow hover:bg-green-600 disabled:bg-gray-400 disabled:cursor-not-allowed">
             {{ isMonitoring ? 'Monitoreando en tiempo real' : 'Monitorear en tiempo real' }}
           </button>
-          <button class="bg-red-500 text-white px-4 py-1 rounded-lg shadow hover:bg-red-600">
-            Exportar datos
+          <button (click)="clearAllData()" class="bg-blue-500 text-white px-4 py-1 rounded-lg shadow hover:bg-blue-600">
+            Limpiar datos
           </button>
         </div>
       </div>

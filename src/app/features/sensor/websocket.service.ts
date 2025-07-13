@@ -125,6 +125,18 @@ export class WebsocketService {
     }
   }
 
+  public sendDoctorConfiguration(doctorId: number, patientId: number): void {
+    if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+      const message = {
+        action: 'doctor_config',
+        doctor_id: doctorId,
+        patient_id: patientId
+      };
+      this.socket.send(JSON.stringify(message));
+      console.log('Configuración de doctor enviada:', { doctorId, patientId });
+    }
+  }
+
   startMeasurement(patientId: number): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       const user = this.authService.getUser();
@@ -138,6 +150,11 @@ export class WebsocketService {
 
       // Enviar identificación del usuario
       this.sendIdentification(user.id!, role);
+
+      // Si es doctor, enviar configuración adicional
+      if (role === 'doctor') {
+        this.sendDoctorConfiguration(user.id!, patientId);
+      }
 
       // Enviar comando de inicio de medición
       const message = {
