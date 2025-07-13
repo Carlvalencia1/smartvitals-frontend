@@ -5,6 +5,7 @@ import { PanelComponent } from './ui/pages/panel/panel.component';
 import { MedicalRecordsComponent } from './ui/pages/medical-records/medical-records.component';
 import { PatientHistoryComponent } from './ui/pages/patient-history/patient-history.component';
 import { ProfileComponent } from './ui/pages/profile/profile.component';
+import {CreatePacienteComponent} from './ui/pages/create-paciente/create-paciente.component';
 
 export const routes: Routes = [
   { path: '', component: LoginComponent },
@@ -13,4 +14,5 @@ export const routes: Routes = [
   { path: 'records', component: MedicalRecordsComponent },
   { path: 'history', component: PatientHistoryComponent },
   { path: 'profile', component: ProfileComponent },
+  { path: 'createPaciente', component: CreatePacienteComponent},
 ];

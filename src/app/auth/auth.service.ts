@@ -11,10 +11,9 @@ export class AuthService {
   private isLoggedIn = false;
   private options = {
     headers: {
-      'Content-Type': 'application/json',
-      'Access-Control-Allow-Origin': '*',
-      'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
-    }
+    'Content-Type': 'application/json',
+    'Authorization': `Bearer ${localStorage.getItem('token') || ''}`
+  }
   };
 
   constructor(private http: HttpClient) { }

@@ -1,0 +1,65 @@
+<app-navbar></app-navbar>
+
+<div class="bg-[#e7dcdc] h-[calc(100vh-64px)] py-6 px-4 flex gap-4 overflow-hidden">
+  <!-- Lista lateral de usuarios -->
+  <aside class="w-64 bg-white rounded-lg shadow p-4 h-fit">
+    <h2 class="font-semibold text-sm mb-4">Usuarios</h2>
+    <ul class="text-sm space-y-2">
+      <li *ngFor="let user of usuarios" class="flex items-center justify-between p-2 bg-gray-100 rounded">
+        <div class="flex items-center gap-2">
+          <img [src]="user.profile_picture" class="w-8 h-8 rounded-full border object-cover" />
+          <span>{{ user.name }}<br /><small class="text-xs">{{ user.lastname }}</small></span>
+        </div>
+        <div class="flex gap-1 text-gray-500">
+          <i class="pi pi-pencil cursor-pointer"></i>
+          <i class="pi pi-trash cursor-pointer"></i>
+        </div>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Formulario -->
+  <main class="flex-1 flex flex-col items-center gap-6 overflow-hidden">
+    <div class="w-full max-w-4xl bg-white border-t-4 border-green-500 rounded-lg shadow p-4 text-center">
+      <h1 class="text-2xl font-bold">Pacientes</h1>
+    </div>
+
+    <div class="w-full max-w-4xl bg-[#d2c3c3] rounded-lg shadow p-6 flex gap-6">
+      <!-- Avatar -->
+      <div class="flex-shrink-0 relative">
+        <img [src]="imagenPrevia" alt="Avatar" class="w-20 h-20 rounded-full border object-cover" />
+        <input type="file" (change)="onFileSelected($event)" accept="image/*"
+          class="absolute top-0 left-0 w-20 h-20 opacity-0 cursor-pointer" />
+      </div>
+
+      <!-- Form -->
+      <div class="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div>
+          <label class="font-semibold block mb-1">Nombre</label>
+          <input type="text" [(ngModel)]="nuevoPaciente.name" class="w-full p-2 rounded border" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Apellido</label>
+          <input type="text" [(ngModel)]="nuevoPaciente.lastname" class="w-full p-2 rounded border" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="font-semibold block mb-1">Correo</label>
+          <input type="email" [(ngModel)]="nuevoPaciente.email" class="w-full p-2 rounded border" />
+        </div>
+        <div class="md:col-span-2">
+          <label class="font-semibold block mb-1">Contraseña</label>
+          <input type="password" [(ngModel)]="nuevoPaciente.password" class="w-full p-2 rounded border" />
+        </div>
+        <div>
+          <label class="font-semibold block mb-1">Edad</label>
+          <input type="number" [(ngModel)]="nuevoPaciente.age" class="w-full p-2 rounded border" />
+        </div>
+        <div class="md:col-span-2 flex justify-end">
+          <button (click)="agregarPaciente()" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">
+            Agregar
+          </button>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

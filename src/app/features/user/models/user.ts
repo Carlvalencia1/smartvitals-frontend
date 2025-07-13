@@ -7,4 +7,5 @@ export interface User {
   password: string;
   profile_picture: string; 
   role: 'admin' | 'doctor' | 'patient';
+  age: number;
 }

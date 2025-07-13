@@ -11,8 +11,9 @@
   <!-- Grid de tarjetas para admin y doctor-->
   <div class="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto mt-10"
     *ngIf="currentUser.role === 'admin' || currentUser.role === 'doctor'">
-    <app-cards icon="➕👤" title="AGREGAR PACIENTE" subtitle="Registrar un nuevo paciente"
-      borderColor="border-green-500" />
+
+     <a routerLink="/createPaciente"><app-cards icon="➕👤" title="AGREGAR PACIENTE" subtitle="Registrar un nuevo paciente" borderColor="border-green-500" />
+      </a>
       <a routerLink="/records"><app-cards icon="👥" title="PACIENTES" subtitle="Expedientes de pacientes" borderColor="border-blue-500" /></a>
     <app-cards icon="📊" title="REPORTES" subtitle="Ver reportes y estadísticas" borderColor="border-red-500" />
   </div>
