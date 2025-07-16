@@ -6,7 +6,7 @@ import { AuthService } from '../../../auth/auth.service';
 import { InputTextModule } from 'primeng/inputtext';
 import { TableModule } from 'primeng/table';
 import { ButtonModule } from 'primeng/button';
-import { Record } from '../../../features/medicalRecord/models/record';
+import { MedicalFile } from '../../../features/medicalRecord/models/record';
 import { MedicalRecordService } from '../../../features/medicalRecord/medical-record.service';
 import { UserService } from '../../../features/user/user.service';
 import { FormsModule } from '@angular/forms';
@@ -34,7 +34,8 @@ import { RouterModule } from '@angular/router';
 export class MedicalRecordsComponent implements OnInit {
   currentUser!: User;
   patients: User[] = [];
-  records: Record[] = [];
+  files: MedicalFile[] = [];
+  filteredFiles: MedicalFile[] = [];
   rangeDates: Date[] | undefined;
   selectedPatient: User | undefined;
   recordNumber: string = '';
@@ -50,7 +51,7 @@ export class MedicalRecordsComponent implements OnInit {
     if (this.authService.getUser()) {
       this.currentUser = this.authService.getUser() as User;
     }
-    this.getRecords();
+    this.getFiles();
     if (this.currentUser.role === 'doctor') {
       this.loadPatients();
     }
@@ -75,88 +76,53 @@ export class MedicalRecordsComponent implements OnInit {
     });
   }
 
-  getRecords(): Record[] {
+  getFiles(): void {
     if (!this.currentUser.id) {
-      console.error('Doctor ID is not available');
-      return [];
+      console.error('User ID is not available');
+      return;
     }
     if (this.currentUser.role === 'doctor') {
-      this.recordService.getDoctorMedicalRecords(this.currentUser.id).subscribe({
+      this.recordService.getDoctorMedicalFiles(this.currentUser.id).subscribe({
         next: (data) => {
-          this.records = data;
+          this.files = data;
+          this.filteredFiles = data;
         },
         error: (error) => {
-          console.error('Error fetching doctor medical records:', error);
+          console.error('Error fetching doctor medical files:', error);
         }
       });
     } else if (this.currentUser.role === 'patient') {
-      this.recordService.getPatientMedicalRecords(this.currentUser.id).subscribe({
+      this.recordService.getPatientMedicalFiles(this.currentUser.id).subscribe({
         next: (data) => {
-          this.records = data;
+          this.files = data;
+          this.filteredFiles = data;
         },
         error: (error) => {
-          console.error('Error fetching patient medical records:', error);
+          console.error('Error fetching patient medical files:', error);
         }
       });
     }
-    return this.records;
-  }
-
-  getPatients(): User[] {
-    return this.patients;
   }
 
   applyFilters(): void {
-    // Si hay al menos una fecha seleccionada
-    if (this.rangeDates && this.rangeDates.length > 0 && this.rangeDates[0]) {
-      // Si solo hay una fecha, usa la misma para inicio y fin
-      const startDate = this.rangeDates[0].toISOString().split('T')[0];
-      const endDate = (this.rangeDates[1] ? this.rangeDates[1] : this.rangeDates[0]).toISOString().split('T')[0];
-
-      if (this.currentUser.role === 'doctor') {
-        const doctorId = this.currentUser.id!;
-        let patientId = this.selectedPatient?.id!;
-
-        if (patientId) {
-          this.recordService.getPatientMedicalRecordsByRange(patientId, startDate, endDate).subscribe({
-            next: (data) => {
-              this.records = this.filterByRecordNumber(data);
-            },
-            error: (error) => {
-              console.error('Error filtrando por paciente y rango:', error);
-            }
-          });
-        } else {
-          this.recordService.getDoctorMedicalRecordsByRange(doctorId, startDate, endDate).subscribe({
-            next: (data) => {
-              this.records = this.filterByRecordNumber(data);
-            },
-            error: (error) => {
-              console.error('Error filtrando por doctor y rango:', error);
-            }
-          });
-        }
-      } else if (this.currentUser.role === 'patient') {
-        const patientId = this.currentUser.id!;
-        this.recordService.getPatientMedicalRecordsByRange(patientId, startDate, endDate).subscribe({
-          next: (data) => {
-            this.records = this.filterByRecordNumber(data);
-          },
-          error: (error) => {
-            console.error('Error filtrando por paciente y rango:', error);
-          }
-        });
-      }
-    } else if (this.recordNumber) {
-      this.records = this.filterByRecordNumber(this.records);
-    } else {
-      this.getRecords();
+    let files = [...this.files];
+    // Filtrar por paciente (solo para doctor)
+    if (this.currentUser.role === 'doctor' && this.selectedPatient) {
+      files = files.filter(file => file.patient_id === this.selectedPatient!.id);
     }
-  }
-
-  // Método auxiliar para filtrar por número de expediente
-  filterByRecordNumber(records: Record[]): Record[] {
-    if (!this.recordNumber) return records;
-    return records.filter(record => record.id.toString().includes(this.recordNumber));
+    // Filtrar por rango de fechas
+    if (this.rangeDates && this.rangeDates.length > 0 && this.rangeDates[0]) {
+      const start = this.rangeDates[0];
+      const end = this.rangeDates[1] ? this.rangeDates[1] : this.rangeDates[0];
+      files = files.filter(file => {
+        const fileDate = new Date(file.created_at);
+        return fileDate >= start && fileDate <= end;
+      });
+    }
+    // Filtrar por número de expediente
+    if (this.recordNumber) {
+      files = files.filter(file => file.id.toString().includes(this.recordNumber));
+    }
+    this.filteredFiles = files;
   }
 }

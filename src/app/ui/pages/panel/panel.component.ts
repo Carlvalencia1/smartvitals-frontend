@@ -13,6 +13,7 @@ import { User } from '../../../features/user/models/user';
 import { UserService } from '../../../features/user/user.service';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { MedicalRecordService } from '../../../features/medicalRecord/medical-record.service';
 
 
 @Component({
@@ -189,7 +190,8 @@ export class PanelComponent implements OnInit, OnDestroy {
   constructor(
     private websocketService: WebsocketService,
     private authService: AuthService,
-    private userService: UserService
+    private userService: UserService,
+    private medicalRecordService: MedicalRecordService
   ) { }
 
   ngOnInit() {
@@ -305,6 +307,8 @@ export class PanelComponent implements OnInit, OnDestroy {
   startMonitoring() {
     if (this.isConnected) {
       let patientIdToMonitor = this.currentUserId;
+      let doctorId = this.currentUser.role === 'doctor' ? this.currentUser.id : undefined;
+      let patientObj = null;
 
       // Si es doctor y tiene un paciente seleccionado, usar el ID del paciente
       if (this.currentUser.role === 'doctor') {
@@ -313,27 +317,39 @@ export class PanelComponent implements OnInit, OnDestroy {
           alert('Por favor, selecciona un paciente antes de iniciar el monitoreo');
           return;
         }
-
-        console.log('selectedPatient completo:', this.selectedPatient);
-
-        // El selectedPatient contiene el objeto option completo, necesitamos acceder al value
         const patient = this.selectedPatient.value || this.selectedPatient;
-        console.log('Paciente extraído:', patient);
-        console.log('Paciente ID:', patient.id);
-        console.log('Paciente name:', patient.name);
-
         if (patient && patient.id) {
           patientIdToMonitor = patient.id;
-          console.log('Monitoreando paciente:', patient.name, 'ID:', patientIdToMonitor);
+          patientObj = patient;
         } else {
           console.error('Error: El paciente seleccionado no tiene ID definido');
           alert('Error: El paciente seleccionado no tiene ID válido');
           return;
         }
+      } else {
+        patientObj = this.currentUser;
       }
 
-      this.websocketService.startMeasurement(patientIdToMonitor);
-      console.log('Monitoreo iniciado para paciente ID:', patientIdToMonitor);
+      // Crear expediente antes de iniciar monitoreo
+      const filePayload = {
+        patient_id: patientIdToMonitor,
+        doctor_id: doctorId,
+        diagnosis: '',
+        treatment: '',
+        notes: ''
+      };
+      this.medicalRecordService.createMedicalFile(filePayload).subscribe({
+        next: (file) => {
+          const medicalFileId = file.id;
+          console.log('Expediente creado, medicalFileId:', medicalFileId);
+          this.websocketService.startMeasurement(medicalFileId);
+          console.log('Monitoreo iniciado para expediente ID:', medicalFileId);
+        },
+        error: (err) => {
+          console.error('Error al crear expediente antes de monitorear:', err);
+          alert('No se pudo crear el expediente para iniciar el monitoreo');
+        }
+      });
     } else {
       console.error('WebSocket no está conectado');
     }

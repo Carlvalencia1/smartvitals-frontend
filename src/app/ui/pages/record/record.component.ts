@@ -5,6 +5,7 @@ import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { CardModule } from 'primeng/card';
 import { MedicalRecordService } from '../../../features/medicalRecord/medical-record.service';
 import { RecordWithRisks } from '../../../features/medicalRecord/models/record-with-risks';
+import { MedicalFile } from '../../../features/medicalRecord/models/record';
 
 @Component({
   selector: 'app-record',
@@ -14,7 +15,7 @@ import { RecordWithRisks } from '../../../features/medicalRecord/models/record-w
   styleUrl: './record.component.css'
 })
 export class RecordComponent implements OnInit {
-  record?: RecordWithRisks;
+  file?: MedicalFile;
   loading = true;
   error = '';
 
@@ -30,9 +31,9 @@ export class RecordComponent implements OnInit {
       this.loading = false;
       return;
     }
-    this.recordService.getMedicalRecordWithRisks(id).subscribe({
-      next: (data) => {
-        this.record = data;
+    this.recordService.getMedicalFileRecords(id).subscribe({
+      next: (data: MedicalFile) => {
+        this.file = data;
         this.loading = false;
       },
       error: (err) => {

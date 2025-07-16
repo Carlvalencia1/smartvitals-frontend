@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
-import { Record } from './models/record';
+import { MedicalFile, MedicalRecord } from './models/record';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { RecordWithRisks } from './models/record-with-risks';
@@ -14,92 +14,75 @@ export class MedicalRecordService {
 
   constructor(private authService: AuthService, private http: HttpClient) { }
 
-  getDoctorMedicalRecords(doctor_id: number): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/doctors/${doctor_id}/medicalRecords`, {
+  // Obtener todos los expedientes de un paciente
+  getPatientMedicalFiles(patient_id: number) {
+    return this.http.get<MedicalFile[]>(`${this.apiUrl}/patients/${patient_id}/medicalFiles`, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getPatientMedicalRecords(patient_id: number): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/patients/${patient_id}/medicalRecords`, {
+  // Obtener todos los expedientes de un doctor (si aplica)
+  getDoctorMedicalFiles(doctor_id: number) {
+    return this.http.get<MedicalFile[]>(`${this.apiUrl}/doctors/${doctor_id}/medicalFiles`, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getPatientMedicalRecordsByRange(patient_id: number, startDate: string, endDate: string): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/patients/${patient_id}/medicalRecords/range`, {
-      params: {
-        start_date: startDate,
-        end_date: endDate
-      },
+  // Obtener los registros de un expediente específico
+  getMedicalFileRecords(file_id: number) {
+    return this.http.get<MedicalFile>(`${this.apiUrl}/medicalFiles/${file_id}/records`, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getDoctorMedicalRecordsByRange(doctor_id: number, startDate: string, endDate: string): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/doctors/${doctor_id}/medicalRecords/range`, {
-      params: {
-        startDate: startDate,
-        endDate: endDate
-      },
+  // Crear un nuevo expediente
+  createMedicalFile(data: Partial<MedicalFile>) {
+    return this.http.post<MedicalFile>(`${this.apiUrl}/medicalFiles`, data, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getDoctorStatistics(doctor_id: number): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${doctor_id}/patients`, {
+  // Crear un nuevo registro médico en un expediente
+  createMedicalRecord(data: Partial<MedicalRecord>) {
+    return this.http.post<MedicalRecord>(`${this.apiUrl}/medicalRecords`, data, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getPatientStatistics(patient_id: number): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${patient_id}`, {
+  // Actualizar un expediente
+  updateMedicalFile(file_id: number, data: Partial<MedicalFile>) {
+    return this.http.put<MedicalFile>(`${this.apiUrl}/medicalFiles/${file_id}`, data, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getDoctorStatisticsByRange(doctor_id: number, startDate: string, endDate: string): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${doctor_id}/patients/range`, {
-      params: {
-        startDate: startDate,
-        endDate: endDate
-      },
+  // Actualizar un registro médico
+  updateMedicalRecord(record_id: number, data: Partial<MedicalRecord>) {
+    return this.http.put<MedicalRecord>(`${this.apiUrl}/medicalRecords/${record_id}`, data, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
 
-  getPatientStatisticsByRange(patient_id: number, startDate: string, endDate: string): Observable<Record[]> {
-    return this.http.get<Record[]>(`${this.apiUrl}/stadistics/${patient_id}/range`, {
-      params: {
-        startDate: startDate,
-        endDate: endDate
-      },
+  // Eliminar un registro médico
+  deleteMedicalRecord(record_id: number) {
+    return this.http.delete(`${this.apiUrl}/medicalRecords/${record_id}`, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
     });
   }
-
-  getMedicalRecordWithRisks(id: number): Observable<RecordWithRisks> {
-    return this.http.get<RecordWithRisks>(`${this.apiUrl}/medicalRecords/${id}`, {
-      headers: {
-        'Authorization': `Bearer ${this.authService.getToken()}`
-      }
-    });
-  }
-
 }

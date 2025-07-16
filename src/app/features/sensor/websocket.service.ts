@@ -137,7 +137,7 @@ export class WebsocketService {
     }
   }
 
-  startMeasurement(patientId: number): void {
+  startMeasurement(medicalFileId: number): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       const user = this.authService.getUser();
       if (!user) {
@@ -153,19 +153,19 @@ export class WebsocketService {
 
       // Si es doctor, enviar configuración adicional
       if (role === 'doctor') {
-        this.sendDoctorConfiguration(user.id!, patientId);
+        // Aquí podrías enviar configuración adicional si es necesario
       }
 
-      // Enviar comando de inicio de medición
+      // Enviar comando de inicio de medición con medical_file_id
       const message = {
         action: 'start',
-        patient_id: patientId
+        medical_file_id: medicalFileId
       };
       this.socket.send(JSON.stringify(message));
 
       this.isMonitoring = true;
       this.monitoringStatusSubject.next(true);
-      console.log('Medición iniciada para paciente:', patientId);
+      console.log('Medición iniciada para expediente:', medicalFileId);
     } else {
       console.error('WebSocket no está conectado');
     }
