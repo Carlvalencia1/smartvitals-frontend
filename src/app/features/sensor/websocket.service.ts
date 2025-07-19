@@ -53,9 +53,6 @@ export class WebsocketService {
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.connectionStatusSubject.next(true);
-
-      // NO enviar identificación automáticamente
-      // Solo se enviará cuando se inicie el monitoreo
     };
 
     this.socket.onmessage = (event) => {

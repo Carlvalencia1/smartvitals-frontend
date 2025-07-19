@@ -121,7 +121,7 @@
       <div class="lg:col-span-2">
         <app-cards icon="❤️" title="Ritmo Cardiaco" [subtitle]="realTimeData.heartRate + ' ppm'"
           borderColor="border-green-500">
-          <p-chart type="line" [data]="heartRateData" [options]="lineChartOptions"
+          <p-chart type="line" [data]="heartRateData" [options]="heartRateChartOptions"
             class="h-32 mt-4 rounded-lg bg-white"></p-chart>
         </app-cards>
       </div>
@@ -129,7 +129,7 @@
       <div class="lg:col-span-2">
         <app-cards icon="🩸" title="Saturación de Oxígeno (SpO2)" [subtitle]="realTimeData.spo2 + ' %'"
           borderColor="border-green-500">
-          <p-chart type="bar" [data]="spo2Data" [options]="barChartOptions"
+          <p-chart type="bar" [data]="spo2Data" [options]="spo2ChartOptions"
             class="h-32 mt-4 rounded-lg bg-white"></p-chart>
         </app-cards>
       </div>
@@ -137,7 +137,7 @@
       <div class="lg:col-span-2">
         <app-cards icon="🌡️" title="Temperatura Corporal" [subtitle]="realTimeData.temperature + ' °C'"
           borderColor="border-red-500">
-          <p-chart type="line" [data]="temperatureData" [options]="lineChartOptions"
+          <p-chart type="line" [data]="temperatureData" [options]="temperatureChartOptions"
             class="h-32 mt-4 rounded-lg bg-white"></p-chart>
         </app-cards>
       </div>
@@ -146,14 +146,14 @@
         <app-cards icon="🫀" title="Presión Arterial"
           [subtitle]="realTimeData.bloodPressure.systolic + '/' + realTimeData.bloodPressure.diastolic + ' mmHg'"
           borderColor="border-green-500">
-          <p-chart type="line" [data]="bloodPressureData" [options]="multiAxisOptions"
+          <p-chart type="line" [data]="bloodPressureData" [options]="bloodPressureChartOptions"
             class="h-32 mt-4 rounded-lg bg-white"></p-chart>
         </app-cards>
       </div>
 
       <div class="lg:col-span-4">
         <app-cards icon="📈" title="Electroencefalograma" subtitle="Señal activa" borderColor="border-green-500">
-          <p-chart type="line" [data]="eegData" [options]="lineChartOptions"
+          <p-chart type="line" [data]="eegData" [options]="heartRateChartOptions"
             class="h-32 mt-4 rounded-lg bg-white"></p-chart>
         </app-cards>
       </div>

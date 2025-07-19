@@ -127,47 +127,10 @@ export class PanelComponent implements OnInit, OnDestroy {
     ]
   };
 
-  lineChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true }
-    },
-    scales: {
-      y: { min: 0, max: 100 },
-      x: { display: false }
-    },
-    animation: {
-      duration: 0 // Desactivar animaciones para mejor rendimiento
-    },
-    elements: {
-      point: {
-        radius: 0 // Ocultar puntos para mejor rendimiento
-      },
-      line: {
-        tension: 0.4
-      }
-    }
-  };
+  
 
-  barChartOptions = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true }
-    },
-    scales: {
-      y: { beginAtZero: true, max: 100 },
-      x: { display: false }
-    },
-    animation: {
-      duration: 0
-    }
-  };
-
-  multiAxisOptions = {
+  // Opciones específicas para ritmo cardíaco (valores altos)
+  heartRateChartOptions = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -176,9 +139,96 @@ export class PanelComponent implements OnInit, OnDestroy {
     },
     scales: {
       y: {
-        beginAtZero: true,
-        min: 60,
-        max: 140
+        min: 0,
+        max: 220, // Soporte para ritmos cardíacos hasta 220 ppm
+        ticks: {
+          stepSize: 20
+        }
+      },
+      x: { display: false }
+    },
+    animation: {
+      duration: 0
+    },
+    elements: {
+      point: {
+        radius: 0
+      },
+      line: {
+        tension: 0.4
+      }
+    }
+  };
+
+  // Opciones para SpO2 (0-100%)
+  spo2ChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true }
+    },
+    scales: {
+      y: {
+        min: 0,
+        max: 100,
+        ticks: {
+          stepSize: 10
+        }
+      },
+      x: { display: false }
+    },
+    animation: {
+      duration: 0
+    }
+  };
+
+  // Opciones para temperatura (escala realista)
+  temperatureChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true }
+    },
+    scales: {
+      y: {
+        min: 30,
+        max: 45, // Rango realista de temperatura corporal
+        ticks: {
+          stepSize: 2
+        }
+      },
+      x: { display: false }
+    },
+    animation: {
+      duration: 0
+    },
+    elements: {
+      point: {
+        radius: 0
+      },
+      line: {
+        tension: 0.4
+      }
+    }
+  };
+
+  // Opciones para presión arterial (escala médica realista)
+  bloodPressureChartOptions = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: { enabled: true }
+    },
+    scales: {
+      y: {
+        min: 40,
+        max: 200, // Soporte para presiones altas
+        ticks: {
+          stepSize: 20
+        }
       },
       x: { display: false }
     },
@@ -455,9 +505,6 @@ export class PanelComponent implements OnInit, OnDestroy {
       console.log(`Datos recibidos: patient_id=${dataPatientId}, doctor_id=${dataDoctorId}`);
       return;
     }
-
-    console.log(`Procesando datos para usuario ${currentUserId}, paciente monitoreado ${targetPatientId}`);
-    console.log(`Datos válidos: patient_id=${dataPatientId}, doctor_id=${dataDoctorId}`);
 
     switch (sensorData.topic) {
       case 'temperatura':
