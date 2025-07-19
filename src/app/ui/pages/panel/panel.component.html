@@ -119,43 +119,71 @@
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:grid-cols-4">
 
       <div class="lg:col-span-2">
-        <app-cards icon="❤️" title="Ritmo Cardiaco" [subtitle]="realTimeData.heartRate + ' ppm'"
-          borderColor="border-green-500">
-          <p-chart type="line" [data]="heartRateData" [options]="heartRateChartOptions"
-            class="h-32 mt-4 rounded-lg bg-white"></p-chart>
-        </app-cards>
+        <p-card header="Ritmo Cardíaco" styleClass="h-full">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl font-bold text-red-500">{{ realTimeData.heartRate || 0 }} ppm</span>
+            <span class="text-sm text-gray-500">Tiempo Real</span>
+          </div>
+          <div class="chart-container" style="height: 200px;">
+            <canvas baseChart [data]="heartRateChartData" [options]="heartRateChartOptions" type="line">
+            </canvas>
+          </div>
+        </p-card>
       </div>
 
       <div class="lg:col-span-2">
-        <app-cards icon="🩸" title="Saturación de Oxígeno (SpO2)" [subtitle]="realTimeData.spo2 + ' %'"
-          borderColor="border-green-500">
-          <p-chart type="bar" [data]="spo2Data" [options]="spo2ChartOptions"
-            class="h-32 mt-4 rounded-lg bg-white"></p-chart>
-        </app-cards>
+        <p-card header="Saturación de Oxígeno" styleClass="h-full">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl font-bold text-blue-500">{{ realTimeData.spo2 || 0 }}%</span>
+            <span class="text-sm text-gray-500">Tiempo Real</span>
+          </div>
+          <div class="chart-container" style="height: 200px;">
+            <canvas baseChart [data]="spo2ChartData" [options]="spo2ChartOptions" type="bar">
+            </canvas>
+          </div>
+        </p-card>
       </div>
 
       <div class="lg:col-span-2">
-        <app-cards icon="🌡️" title="Temperatura Corporal" [subtitle]="realTimeData.temperature + ' °C'"
-          borderColor="border-red-500">
-          <p-chart type="line" [data]="temperatureData" [options]="temperatureChartOptions"
-            class="h-32 mt-4 rounded-lg bg-white"></p-chart>
-        </app-cards>
+        <p-card header="Temperatura Corporal" styleClass="h-full">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl font-bold text-orange-500">{{ realTimeData.temperature || 0 }}°C</span>
+            <span class="text-sm text-gray-500">Tiempo Real</span>
+          </div>
+          <div class="chart-container" style="height: 200px;">
+            <canvas baseChart [data]="temperatureChartData" [options]="temperatureChartOptions" type="line">
+            </canvas>
+          </div>
+        </p-card>
       </div>
 
       <div class="lg:col-span-2">
-        <app-cards icon="🫀" title="Presión Arterial"
-          [subtitle]="realTimeData.bloodPressure.systolic + '/' + realTimeData.bloodPressure.diastolic + ' mmHg'"
-          borderColor="border-green-500">
-          <p-chart type="line" [data]="bloodPressureData" [options]="bloodPressureChartOptions"
-            class="h-32 mt-4 rounded-lg bg-white"></p-chart>
-        </app-cards>
+        <p-card header="Presión Arterial" styleClass="h-full">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl font-bold text-green-500">
+              {{ realTimeData.bloodPressure.systolic || 0 }}/{{ realTimeData.bloodPressure.diastolic || 0 }} mmHg
+            </span>
+            <span class="text-sm text-gray-500">Tiempo Real</span>
+          </div>
+          <div class="chart-container" style="height: 200px;">
+            <canvas baseChart [data]="bloodPressureChartData" [options]="bloodPressureChartOptions"
+              type="line">
+            </canvas>
+          </div>
+        </p-card>
       </div>
 
       <div class="lg:col-span-4">
-        <app-cards icon="📈" title="Electroencefalograma" subtitle="Señal activa" borderColor="border-green-500">
-          <p-chart type="line" [data]="eegData" [options]="heartRateChartOptions"
-            class="h-32 mt-4 rounded-lg bg-white"></p-chart>
-        </app-cards>
+        <p-card header="Electroencefalograma" styleClass="h-full">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-2xl font-bold text-purple-500">Señal Activa</span>
+            <span class="text-sm text-gray-500">Tiempo Real</span>
+          </div>
+          <div class="chart-container" style="height: 200px;">
+            <canvas baseChart [data]="eegChartData" [options]="heartRateChartOptions" type="line">
+            </canvas>
+          </div>
+        </p-card>
       </div>
 
     </div>

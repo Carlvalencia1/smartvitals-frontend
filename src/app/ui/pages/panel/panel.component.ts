@@ -2,7 +2,6 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
 import { CardsComponent } from '../../components/cards/cards.component';
-import { ChartModule } from 'primeng/chart';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../auth/auth.service';
@@ -15,12 +14,17 @@ import { User } from '../../../features/user/models/user';
 import { UserService } from '../../../features/user/user.service';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { NgChartsModule } from 'ng2-charts';
+import { Chart, ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
+import { CardModule } from 'primeng/card';
+
+Chart.register(...registerables);
 
 
 @Component({
   selector: 'app-panel',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, CardsComponent, ChartModule, SelectModule, FormsModule, ToastModule],
+  imports: [CommonModule, NavbarComponent, CardsComponent, NgChartsModule, SelectModule, FormsModule, ToastModule, CardModule],
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.css'],
   providers: [MessageService]
@@ -59,191 +63,293 @@ export class PanelComponent implements OnInit, OnDestroy {
     bloodPressure: { systolic: null as number | null, diastolic: null as number | null }
   };
 
-  heartRateData = {
-    labels: [] as string[],
-    datasets: [
-      {
-        label: 'ppm',
-        data: [] as number[],
-        borderColor: '#EC407A',
-        fill: false,
-        tension: 0.4
-      }
-    ]
+  // Configuraciones de Chart.js
+  public lineChartType: ChartType = 'line';
+  public barChartType: ChartType = 'bar';
+
+  // Datos para ritmo cardíaco con tiempo real
+  public heartRateChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [{
+      label: 'Ritmo Cardíaco (ppm)',
+      data: [],
+      borderColor: '#EC407A',
+      backgroundColor: 'rgba(236, 64, 122, 0.1)',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 3,
+      pointHoverRadius: 6
+    }]
   };
 
-  spo2Data = {
-    labels: [] as string[],
-    datasets: [
-      {
-        label: 'SpO2 %',
-        backgroundColor: '#42A5F5',
-        data: [] as number[]
-      }
-    ]
+  // Datos para SpO2
+  public spo2ChartData: ChartData<'bar'> = {
+    labels: [],
+    datasets: [{
+      label: 'Saturación de Oxígeno (%)',
+      data: [],
+      backgroundColor: '#42A5F5',
+      borderColor: '#1976D2',
+      borderWidth: 1
+    }]
   };
 
-  temperatureData = {
-    labels: [] as string[],
-    datasets: [
-      {
-        label: '°C',
-        data: [] as number[],
-        borderColor: '#FFA726',
-        fill: false,
-        tension: 0.4
-      }
-    ]
+  // Datos para temperatura
+  public temperatureChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [{
+      label: 'Temperatura (°C)',
+      data: [],
+      borderColor: '#FFA726',
+      backgroundColor: 'rgba(255, 167, 38, 0.1)',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 3,
+      pointHoverRadius: 6
+    }]
   };
 
-  bloodPressureData = {
-    labels: [] as string[],
+  // Datos para presión arterial
+  public bloodPressureChartData: ChartData<'line'> = {
+    labels: [],
     datasets: [
       {
-        label: 'Sistólica',
+        label: 'Sistólica (mmHg)',
+        data: [],
         borderColor: '#66BB6A',
-        data: [] as number[],
-        fill: false
+        backgroundColor: 'rgba(102, 187, 106, 0.1)',
+        borderWidth: 2,
+        fill: false,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6
       },
       {
-        label: 'Diastólica',
+        label: 'Diastólica (mmHg)',
+        data: [],
         borderColor: '#FF7043',
-        data: [] as number[],
-        fill: false
-      }
-    ]
-  };
-
-  eegData = {
-    labels: ['1s', '2s', '3s', '4s', '5s'] as string[],
-    datasets: [
-      {
-        label: 'Voltaje',
-        borderColor: '#AB47BC',
-        data: [0, 0, 0, 0, 0] as number[],
+        backgroundColor: 'rgba(255, 112, 67, 0.1)',
+        borderWidth: 2,
         fill: false,
-        tension: 0.4
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6
       }
     ]
   };
 
-  
+  // Datos para EEG
+  public eegChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: [{
+      label: 'Señal EEG (µV)',
+      data: [],
+      borderColor: '#AB47BC',
+      backgroundColor: 'rgba(171, 71, 188, 0.1)',
+      borderWidth: 2,
+      fill: true,
+      tension: 0.4,
+      pointRadius: 2,
+      pointHoverRadius: 5
+    }]
+  };
 
-  // Opciones específicas para ritmo cardíaco (valores altos)
-  heartRateChartOptions = {
+
+
+  // Opciones para Chart.js
+  public heartRateChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true }
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white'
+      }
     },
     scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Tiempo'
+        },
+        ticks: {
+          maxTicksLimit: 10
+        }
+      },
       y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Ritmo Cardíaco (ppm)'
+        },
         min: 0,
-        max: 220, // Soporte para ritmos cardíacos hasta 220 ppm
+        max: 220,
         ticks: {
           stepSize: 20
         }
-      },
-      x: { display: false }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
     },
     animation: {
-      duration: 0
-    },
-    elements: {
-      point: {
-        radius: 0
-      },
-      line: {
-        tension: 0.4
-      }
+      duration: 300
     }
   };
 
-  // Opciones para SpO2 (0-100%)
-  spo2ChartOptions = {
+  public spo2ChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true }
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white'
+      }
     },
     scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Tiempo'
+        },
+        ticks: {
+          maxTicksLimit: 10
+        }
+      },
       y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'SpO2 (%)'
+        },
         min: 0,
         max: 100,
         ticks: {
           stepSize: 10
         }
-      },
-      x: { display: false }
+      }
     },
     animation: {
-      duration: 0
+      duration: 300
     }
   };
 
-  // Opciones para temperatura (escala realista)
-  temperatureChartOptions = {
+  public temperatureChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true }
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white'
+      }
     },
     scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Tiempo'
+        },
+        ticks: {
+          maxTicksLimit: 10
+        }
+      },
       y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Temperatura (°C)'
+        },
         min: 30,
-        max: 45, // Rango realista de temperatura corporal
+        max: 45,
         ticks: {
           stepSize: 2
         }
-      },
-      x: { display: false }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
     },
     animation: {
-      duration: 0
-    },
-    elements: {
-      point: {
-        radius: 0
-      },
-      line: {
-        tension: 0.4
-      }
+      duration: 300
     }
   };
 
-  // Opciones para presión arterial (escala médica realista)
-  bloodPressureChartOptions = {
+  public bloodPressureChartOptions: ChartConfiguration<'line'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
-      legend: { display: false },
-      tooltip: { enabled: true }
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white'
+      }
     },
     scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Tiempo'
+        },
+        ticks: {
+          maxTicksLimit: 10
+        }
+      },
       y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Presión Arterial (mmHg)'
+        },
         min: 40,
-        max: 200, // Soporte para presiones altas
+        max: 200,
         ticks: {
           stepSize: 20
         }
-      },
-      x: { display: false }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
     },
     animation: {
-      duration: 0
-    },
-    elements: {
-      point: {
-        radius: 0
-      },
-      line: {
-        tension: 0.4
-      }
+      duration: 300
     }
   };
+
+
 
   constructor(
     private websocketService: WebsocketService,
@@ -538,92 +644,136 @@ export class PanelComponent implements OnInit, OnDestroy {
 
   private updateHeartRateChart(value: number) {
     const maxDataPoints = 20; // Mantener solo los últimos 20 puntos
+    const currentTime = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
-    if (this.heartRateData.labels.length >= maxDataPoints) {
-      this.heartRateData.labels.shift();
-      this.heartRateData.datasets[0].data.shift();
+    if (this.heartRateChartData.labels && this.heartRateChartData.labels.length >= maxDataPoints) {
+      this.heartRateChartData.labels.shift();
+      if (this.heartRateChartData.datasets[0]?.data) {
+        this.heartRateChartData.datasets[0].data.shift();
+      }
     }
 
-    const nextLabel = `${this.heartRateData.labels.length + 1}s`;
-    this.heartRateData.labels.push(nextLabel);
-    this.heartRateData.datasets[0].data.push(value);
+    if (this.heartRateChartData.labels) {
+      this.heartRateChartData.labels.push(currentTime);
+    }
+    if (this.heartRateChartData.datasets[0]?.data) {
+      this.heartRateChartData.datasets[0].data.push(value);
+    }
 
     // Crear una nueva referencia para trigger de detección de cambios
-    this.heartRateData = {
-      labels: [...this.heartRateData.labels],
+    this.heartRateChartData = {
+      labels: this.heartRateChartData.labels ? [...this.heartRateChartData.labels] : [],
       datasets: [{
-        ...this.heartRateData.datasets[0],
-        data: [...this.heartRateData.datasets[0].data]
+        ...this.heartRateChartData.datasets[0],
+        data: this.heartRateChartData.datasets[0]?.data ? [...this.heartRateChartData.datasets[0].data] : []
       }]
     };
   }
 
   private updateSpo2Chart(value: number) {
     const maxDataPoints = 20;
+    const currentTime = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
-    if (this.spo2Data.labels.length >= maxDataPoints) {
-      this.spo2Data.labels.shift();
-      this.spo2Data.datasets[0].data.shift();
+    if (this.spo2ChartData.labels && this.spo2ChartData.labels.length >= maxDataPoints) {
+      this.spo2ChartData.labels.shift();
+      if (this.spo2ChartData.datasets[0]?.data) {
+        this.spo2ChartData.datasets[0].data.shift();
+      }
     }
 
-    const nextLabel = `${this.spo2Data.labels.length + 1}s`;
-    this.spo2Data.labels.push(nextLabel);
-    this.spo2Data.datasets[0].data.push(value);
+    if (this.spo2ChartData.labels) {
+      this.spo2ChartData.labels.push(currentTime);
+    }
+    if (this.spo2ChartData.datasets[0]?.data) {
+      this.spo2ChartData.datasets[0].data.push(value);
+    }
 
-    this.spo2Data = {
-      labels: [...this.spo2Data.labels],
+    this.spo2ChartData = {
+      labels: this.spo2ChartData.labels ? [...this.spo2ChartData.labels] : [],
       datasets: [{
-        ...this.spo2Data.datasets[0],
-        data: [...this.spo2Data.datasets[0].data]
+        ...this.spo2ChartData.datasets[0],
+        data: this.spo2ChartData.datasets[0]?.data ? [...this.spo2ChartData.datasets[0].data] : []
       }]
     };
   }
 
   private updateTemperatureChart(value: number) {
     const maxDataPoints = 20;
+    const currentTime = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
-    if (this.temperatureData.labels.length >= maxDataPoints) {
-      this.temperatureData.labels.shift();
-      this.temperatureData.datasets[0].data.shift();
+    if (this.temperatureChartData.labels && this.temperatureChartData.labels.length >= maxDataPoints) {
+      this.temperatureChartData.labels.shift();
+      if (this.temperatureChartData.datasets[0]?.data) {
+        this.temperatureChartData.datasets[0].data.shift();
+      }
     }
 
-    const nextLabel = `${this.temperatureData.labels.length + 1}s`;
-    this.temperatureData.labels.push(nextLabel);
-    this.temperatureData.datasets[0].data.push(value);
+    if (this.temperatureChartData.labels) {
+      this.temperatureChartData.labels.push(currentTime);
+    }
+    if (this.temperatureChartData.datasets[0]?.data) {
+      this.temperatureChartData.datasets[0].data.push(value);
+    }
 
-    this.temperatureData = {
-      labels: [...this.temperatureData.labels],
+    this.temperatureChartData = {
+      labels: this.temperatureChartData.labels ? [...this.temperatureChartData.labels] : [],
       datasets: [{
-        ...this.temperatureData.datasets[0],
-        data: [...this.temperatureData.datasets[0].data]
+        ...this.temperatureChartData.datasets[0],
+        data: this.temperatureChartData.datasets[0]?.data ? [...this.temperatureChartData.datasets[0].data] : []
       }]
     };
   }
 
   private updateBloodPressureChart(systolic: number, diastolic: number) {
     const maxDataPoints = 20;
+    const currentTime = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
 
-    if (this.bloodPressureData.labels.length >= maxDataPoints) {
-      this.bloodPressureData.labels.shift();
-      this.bloodPressureData.datasets[0].data.shift();
-      this.bloodPressureData.datasets[1].data.shift();
+    if (this.bloodPressureChartData.labels && this.bloodPressureChartData.labels.length >= maxDataPoints) {
+      this.bloodPressureChartData.labels.shift();
+      if (this.bloodPressureChartData.datasets[0]?.data) {
+        this.bloodPressureChartData.datasets[0].data.shift();
+      }
+      if (this.bloodPressureChartData.datasets[1]?.data) {
+        this.bloodPressureChartData.datasets[1].data.shift();
+      }
     }
 
-    const nextLabel = `${this.bloodPressureData.labels.length + 1}s`;
-    this.bloodPressureData.labels.push(nextLabel);
-    this.bloodPressureData.datasets[0].data.push(systolic);
-    this.bloodPressureData.datasets[1].data.push(diastolic);
+    if (this.bloodPressureChartData.labels) {
+      this.bloodPressureChartData.labels.push(currentTime);
+    }
+    if (this.bloodPressureChartData.datasets[0]?.data) {
+      this.bloodPressureChartData.datasets[0].data.push(systolic);
+    }
+    if (this.bloodPressureChartData.datasets[1]?.data) {
+      this.bloodPressureChartData.datasets[1].data.push(diastolic);
+    }
 
-    this.bloodPressureData = {
-      labels: [...this.bloodPressureData.labels],
+    this.bloodPressureChartData = {
+      labels: this.bloodPressureChartData.labels ? [...this.bloodPressureChartData.labels] : [],
       datasets: [
         {
-          ...this.bloodPressureData.datasets[0],
-          data: [...this.bloodPressureData.datasets[0].data]
+          ...this.bloodPressureChartData.datasets[0],
+          data: this.bloodPressureChartData.datasets[0]?.data ? [...this.bloodPressureChartData.datasets[0].data] : []
         },
         {
-          ...this.bloodPressureData.datasets[1],
-          data: [...this.bloodPressureData.datasets[1].data]
+          ...this.bloodPressureChartData.datasets[1],
+          data: this.bloodPressureChartData.datasets[1]?.data ? [...this.bloodPressureChartData.datasets[1].data] : []
         }
       ]
     };
@@ -657,54 +807,89 @@ export class PanelComponent implements OnInit, OnDestroy {
       bloodPressure: { systolic: null, diastolic: null }
     };
 
-    // Limpiar datos de gráficos
-    this.heartRateData = {
+    // Limpiar datos de gráficos Chart.js
+    this.heartRateChartData = {
       labels: [],
       datasets: [{
-        label: 'ppm',
+        label: 'Ritmo Cardíaco (ppm)',
         data: [],
         borderColor: '#EC407A',
-        fill: false,
-        tension: 0.4
+        backgroundColor: 'rgba(236, 64, 122, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6
       }]
     };
 
-    this.spo2Data = {
+    this.spo2ChartData = {
       labels: [],
       datasets: [{
-        label: 'SpO2 %',
+        label: 'Saturación de Oxígeno (%)',
+        data: [],
         backgroundColor: '#42A5F5',
-        data: []
+        borderColor: '#1976D2',
+        borderWidth: 1
       }]
     };
 
-    this.temperatureData = {
+    this.temperatureChartData = {
       labels: [],
       datasets: [{
-        label: '°C',
+        label: 'Temperatura (°C)',
         data: [],
         borderColor: '#FFA726',
-        fill: false,
-        tension: 0.4
+        backgroundColor: 'rgba(255, 167, 38, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 3,
+        pointHoverRadius: 6
       }]
     };
 
-    this.bloodPressureData = {
+    this.bloodPressureChartData = {
       labels: [],
       datasets: [
         {
-          label: 'Sistólica',
-          borderColor: '#66BB6A',
+          label: 'Sistólica (mmHg)',
           data: [],
-          fill: false
+          borderColor: '#66BB6A',
+          backgroundColor: 'rgba(102, 187, 106, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 3,
+          pointHoverRadius: 6
         },
         {
-          label: 'Diastólica',
-          borderColor: '#FF7043',
+          label: 'Diastólica (mmHg)',
           data: [],
-          fill: false
+          borderColor: '#FF7043',
+          backgroundColor: 'rgba(255, 112, 67, 0.1)',
+          borderWidth: 2,
+          fill: false,
+          tension: 0.4,
+          pointRadius: 3,
+          pointHoverRadius: 6
         }
       ]
+    };
+
+    this.eegChartData = {
+      labels: [],
+      datasets: [{
+        label: 'Señal EEG (µV)',
+        data: [],
+        borderColor: '#AB47BC',
+        backgroundColor: 'rgba(171, 71, 188, 0.1)',
+        borderWidth: 2,
+        fill: true,
+        tension: 0.4,
+        pointRadius: 2,
+        pointHoverRadius: 5
+      }]
     };
 
     // Limpiar alertas
