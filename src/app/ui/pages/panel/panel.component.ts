@@ -1,7 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { NavbarComponent } from '../../components/navbar/navbar.component';
-import { CardsComponent } from '../../components/cards/cards.component';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
 import { AuthService } from '../../../auth/auth.service';
@@ -14,6 +13,8 @@ import { User } from '../../../features/user/models/user';
 import { UserService } from '../../../features/user/user.service';
 import { FormsModule } from '@angular/forms';
 import { SelectModule } from 'primeng/select';
+import { MultiSelectModule } from 'primeng/multiselect';
+import { ButtonModule } from 'primeng/button';
 import { NgChartsModule } from 'ng2-charts';
 import { Chart, ChartConfiguration, ChartData, ChartType, registerables } from 'chart.js';
 import { CardModule } from 'primeng/card';
@@ -24,7 +25,7 @@ Chart.register(...registerables);
 @Component({
   selector: 'app-panel',
   standalone: true,
-  imports: [CommonModule, NavbarComponent, CardsComponent, NgChartsModule, SelectModule, FormsModule, ToastModule, CardModule],
+  imports: [CommonModule, NavbarComponent, NgChartsModule, SelectModule, MultiSelectModule, ButtonModule, FormsModule, ToastModule, CardModule],
   templateUrl: './panel.component.html',
   styleUrls: ['./panel.component.css'],
   providers: [MessageService]
@@ -54,6 +55,26 @@ export class PanelComponent implements OnInit, OnDestroy {
     }
     return this.isConnected && !this.isMonitoring;
   }
+
+  // Configuración de visibilidad de gráficos
+  chartVisibility = {
+    heartRate: true,
+    spo2: true,
+    temperature: true,
+    bloodPressure: true,
+    eeg: true
+  };
+
+  // Opciones para el selector de gráficos
+  chartOptions = [
+    { label: 'Ritmo Cardíaco', value: 'heartRate', icon: 'pi-heart' },
+    { label: 'Saturación de Oxígeno', value: 'spo2', icon: 'pi-circle' },
+    { label: 'Temperatura Corporal', value: 'temperature', icon: 'pi-sun' },
+    { label: 'Presión Arterial', value: 'bloodPressure', icon: 'pi-chart-line' },
+    { label: 'Electroencefalograma', value: 'eeg', icon: 'pi-wave-pulse' }
+  ];
+
+  selectedCharts: string[] = ['heartRate', 'spo2', 'temperature', 'bloodPressure', 'eeg'];
 
   // Datos en tiempo real (inicialmente vacíos)
   realTimeData = {
@@ -96,18 +117,14 @@ export class PanelComponent implements OnInit, OnDestroy {
   };
 
   // Datos para temperatura
-  public temperatureChartData: ChartData<'line'> = {
+  public temperatureChartData: ChartData<'bar'> = {
     labels: [],
     datasets: [{
       label: 'Temperatura (°C)',
       data: [],
-      borderColor: '#FFA726',
-      backgroundColor: 'rgba(255, 167, 38, 0.1)',
-      borderWidth: 2,
-      fill: true,
-      tension: 0.4,
-      pointRadius: 3,
-      pointHoverRadius: 6
+      backgroundColor: '#FFA726',
+      borderColor: '#FB8C00',
+      borderWidth: 1
     }]
   };
 
@@ -251,7 +268,7 @@ export class PanelComponent implements OnInit, OnDestroy {
     }
   };
 
-  public temperatureChartOptions: ChartConfiguration<'line'>['options'] = {
+  public temperatureChartOptions: ChartConfiguration<'bar'>['options'] = {
     responsive: true,
     maintainAspectRatio: false,
     plugins: {
@@ -260,8 +277,6 @@ export class PanelComponent implements OnInit, OnDestroy {
         position: 'top'
       },
       tooltip: {
-        mode: 'index',
-        intersect: false,
         backgroundColor: 'rgba(0, 0, 0, 0.8)',
         titleColor: 'white',
         bodyColor: 'white'
@@ -290,10 +305,6 @@ export class PanelComponent implements OnInit, OnDestroy {
           stepSize: 2
         }
       }
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index'
     },
     animation: {
       duration: 300
@@ -500,6 +511,9 @@ export class PanelComponent implements OnInit, OnDestroy {
 
     // Sincronizar estado de monitoreo con el servicio
     this.isMonitoring = this.websocketService.isMonitoringStatus();
+
+    // Inicializar visibilidad de gráficos
+    this.updateChartVisibility();
   }
 
   ngOnDestroy() {
@@ -839,13 +853,9 @@ export class PanelComponent implements OnInit, OnDestroy {
       datasets: [{
         label: 'Temperatura (°C)',
         data: [],
-        borderColor: '#FFA726',
-        backgroundColor: 'rgba(255, 167, 38, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 3,
-        pointHoverRadius: 6
+        backgroundColor: '#FFA726',
+        borderColor: '#FB8C00',
+        borderWidth: 1
       }]
     };
 
@@ -896,6 +906,58 @@ export class PanelComponent implements OnInit, OnDestroy {
     this.alerts = [];
 
     console.log('Datos limpiados correctamente');
+  }
+
+  updateChartVisibility(): void {
+    // Resetear todas las visibilidades
+    this.chartVisibility = {
+      heartRate: false,
+      spo2: false,
+      temperature: false,
+      bloodPressure: false,
+      eeg: false
+    };
+
+    // Activar solo los gráficos seleccionados
+    this.selectedCharts.forEach(chart => {
+      if (chart in this.chartVisibility) {
+        (this.chartVisibility as any)[chart] = true;
+      }
+    });
+
+    console.log('Visibilidad de gráficos actualizada:', this.chartVisibility);
+  }
+
+  toggleChart(chartType: string): void {
+    const index = this.selectedCharts.indexOf(chartType);
+    if (index > -1) {
+      this.selectedCharts.splice(index, 1);
+    } else {
+      this.selectedCharts.push(chartType);
+    }
+    this.updateChartVisibility();
+  }
+
+  isChartVisible(chartType: string): boolean {
+    return this.selectedCharts.includes(chartType);
+  }
+
+  selectAllCharts(): void {
+    this.selectedCharts = [...this.chartOptions.map(chart => chart.value)];
+    this.updateChartVisibility();
+  }
+
+  deselectAllCharts(): void {
+    this.selectedCharts = [];
+    this.updateChartVisibility();
+  }
+
+  get allChartsSelected(): boolean {
+    return this.selectedCharts.length === this.chartOptions.length;
+  }
+
+  get noChartsSelected(): boolean {
+    return this.selectedCharts.length === 0;
   }
 }
 

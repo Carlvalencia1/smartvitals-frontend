@@ -78,6 +78,48 @@
         Limpiar Alertas
       </button>
     </div>
+
+    <!-- Selector de Gráficos -->
+    <div class="chart-selector">
+      <h3>Gráficos Visibles</h3>
+      
+      <!-- Botones de control -->
+      <div class="flex gap-2 mb-3">
+        <button 
+          (click)="selectAllCharts()" 
+          [disabled]="allChartsSelected"
+          class="flex-1 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Todos
+        </button>
+        <button 
+          (click)="deselectAllCharts()" 
+          [disabled]="noChartsSelected"
+          class="flex-1 px-2 py-1 text-xs bg-gray-500 text-white rounded hover:bg-gray-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+        >
+          Ninguno
+        </button>
+      </div>
+
+      <div class="space-y-1">
+        <div *ngFor="let chart of chartOptions" class="chart-option">
+          <input 
+            type="checkbox" 
+            [id]="chart.value" 
+            [checked]="isChartVisible(chart.value)"
+            (change)="toggleChart(chart.value)"
+          >
+          <label [for]="chart.value">
+            {{ chart.label }}
+          </label>
+        </div>
+      </div>
+
+      <!-- Contador de gráficos seleccionados -->
+      <div class="mt-2 text-xs text-gray-500 text-center">
+        {{ selectedCharts.length }} de {{ chartOptions.length }} gráficos seleccionados
+      </div>
+    </div>
   </aside>
 
   <!-- Panel Principal -->
@@ -118,7 +160,7 @@
     <!-- Grid de Cards personalizado -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 lg:grid-cols-4">
 
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-2" *ngIf="chartVisibility.heartRate">
         <p-card header="Ritmo Cardíaco" styleClass="h-full">
           <div class="flex items-center justify-between mb-2">
             <span class="text-2xl font-bold text-red-500">{{ realTimeData.heartRate || 0 }} ppm</span>
@@ -131,7 +173,7 @@
         </p-card>
       </div>
 
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-2" *ngIf="chartVisibility.spo2">
         <p-card header="Saturación de Oxígeno" styleClass="h-full">
           <div class="flex items-center justify-between mb-2">
             <span class="text-2xl font-bold text-blue-500">{{ realTimeData.spo2 || 0 }}%</span>
@@ -144,20 +186,20 @@
         </p-card>
       </div>
 
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-2" *ngIf="chartVisibility.temperature">
         <p-card header="Temperatura Corporal" styleClass="h-full">
           <div class="flex items-center justify-between mb-2">
             <span class="text-2xl font-bold text-orange-500">{{ realTimeData.temperature || 0 }}°C</span>
             <span class="text-sm text-gray-500">Tiempo Real</span>
           </div>
           <div class="chart-container" style="height: 200px;">
-            <canvas baseChart [data]="temperatureChartData" [options]="temperatureChartOptions" type="line">
+            <canvas baseChart [data]="temperatureChartData" [options]="temperatureChartOptions" type="bar">
             </canvas>
           </div>
         </p-card>
       </div>
 
-      <div class="lg:col-span-2">
+      <div class="lg:col-span-2" *ngIf="chartVisibility.bloodPressure">
         <p-card header="Presión Arterial" styleClass="h-full">
           <div class="flex items-center justify-between mb-2">
             <span class="text-2xl font-bold text-green-500">
@@ -166,14 +208,13 @@
             <span class="text-sm text-gray-500">Tiempo Real</span>
           </div>
           <div class="chart-container" style="height: 200px;">
-            <canvas baseChart [data]="bloodPressureChartData" [options]="bloodPressureChartOptions"
-              type="line">
+            <canvas baseChart [data]="bloodPressureChartData" [options]="bloodPressureChartOptions" type="line">
             </canvas>
           </div>
         </p-card>
       </div>
 
-      <div class="lg:col-span-4">
+      <div class="lg:col-span-4" *ngIf="chartVisibility.eeg">
         <p-card header="Electroencefalograma" styleClass="h-full">
           <div class="flex items-center justify-between mb-2">
             <span class="text-2xl font-bold text-purple-500">Señal Activa</span>

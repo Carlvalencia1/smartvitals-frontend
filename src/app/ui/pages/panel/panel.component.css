@@ -1,0 +1,90 @@
+/* Estilos para el selector de gráficos */
+.chart-selector {
+  background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 12px;
+  margin-top: 16px;
+}
+
+.chart-selector h3 {
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.chart-option {
+  display: flex;
+  align-items: center;
+  padding: 6px 0;
+  transition: all 0.2s ease;
+}
+
+.chart-option:hover {
+  background-color: rgba(59, 130, 246, 0.05);
+  border-radius: 4px;
+  padding-left: 4px;
+}
+
+.chart-option input[type="checkbox"] {
+  accent-color: #3b82f6;
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+  cursor: pointer;
+}
+
+.chart-option label {
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+.chart-option:hover label {
+  color: #1f2937;
+}
+
+.chart-option input[type="checkbox"]:checked + label {
+  color: #3b82f6;
+  font-weight: 500;
+}
+
+/* Animación para las transiciones de los gráficos */
+.chart-container {
+  transition: all 0.3s ease-in-out;
+}
+
+/* Responsive grid adjustments */
+@media (max-width: 768px) {
+  .chart-selector {
+    padding: 10px;
+    margin-top: 12px;
+  }
+  
+  .chart-option {
+    padding: 4px 0;
+  }
+}
+
+/* Estilos para mejorar la accesibilidad */
+.chart-option input[type="checkbox"]:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+}
+
+.chart-option label:focus {
+  outline: 2px solid #3b82f6;
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Indicador visual para gráficos ocultos */
+.hidden-chart-indicator {
+  opacity: 0.6;
+  filter: grayscale(20%);
+}

@@ -46,6 +46,28 @@ export class StadisticsComponent implements OnInit {
   medicalRecords: Record[] = [];
   rangeDates: Date[] | undefined;
 
+  // Configuración de visibilidad de gráficos
+  chartVisibility = {
+    statsBar: true,
+    riskRadar: true,
+    rangeComparison: true,
+    temperatureEvolution: true,
+    heartRateEvolution: true,
+    oxygenSaturationEvolution: true
+  };
+
+  // Opciones para el selector de gráficos
+  chartOptions = [
+    { label: 'Estadísticas de Signos Vitales', value: 'statsBar', icon: 'pi-chart-bar' },
+    { label: 'Probabilidades de Riesgo', value: 'riskRadar', icon: 'pi-chart-pie' },
+    { label: 'Comparación con Rangos', value: 'rangeComparison', icon: 'pi-chart-line' },
+    { label: 'Evolución de Temperatura', value: 'temperatureEvolution', icon: 'pi-sun' },
+    { label: 'Evolución de Frecuencia Cardíaca', value: 'heartRateEvolution', icon: 'pi-heart' },
+    { label: 'Evolución de Saturación O2', value: 'oxygenSaturationEvolution', icon: 'pi-circle' }
+  ];
+
+  selectedCharts: string[] = ['statsBar', 'riskRadar', 'rangeComparison', 'temperatureEvolution', 'heartRateEvolution', 'oxygenSaturationEvolution'];
+
   // Configuraciones de gráficos
   public barChartType: ChartType = 'bar';
   public lineChartType: ChartType = 'line';
@@ -162,6 +184,84 @@ export class StadisticsComponent implements OnInit {
     }
   };
 
+  // Datos para gráfico de evolución de frecuencia cardíaca
+  public heartRateEvolutionChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: []
+  };
+
+  public heartRateEvolutionChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true
+      },
+      title: {
+        display: true,
+        text: 'Evolución de Frecuencia Cardíaca con Análisis Estadístico'
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Tiempo'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Frecuencia Cardíaca (bpm)'
+        },
+        beginAtZero: false
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
+    }
+  };
+
+  // Datos para gráfico de evolución de saturación de oxígeno
+  public oxygenSaturationEvolutionChartData: ChartData<'line'> = {
+    labels: [],
+    datasets: []
+  };
+
+  public oxygenSaturationEvolutionChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    plugins: {
+      legend: {
+        display: true
+      },
+      title: {
+        display: true,
+        text: 'Evolución de Saturación de Oxígeno con Análisis Estadístico'
+      }
+    },
+    scales: {
+      x: {
+        title: {
+          display: true,
+          text: 'Tiempo'
+        }
+      },
+      y: {
+        title: {
+          display: true,
+          text: 'Saturación O2 (%)'
+        },
+        beginAtZero: false,
+        min: 85,
+        max: 100
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
+    }
+  };
+
   constructor(
     private authService: AuthService,
     private recordService: MedicalRecordService,
@@ -172,6 +272,9 @@ export class StadisticsComponent implements OnInit {
     if (this.authService.getUser()) {
       this.currentUser = this.authService.getUser() as User;
     }
+
+    // Inicializar visibilidad de gráficos
+    this.updateChartVisibility();
 
     if (this.currentUser.role === 'doctor') {
       this.loadPatients();
@@ -251,6 +354,8 @@ export class StadisticsComponent implements OnInit {
     this.updateRiskRadarChart();
     this.updateRangeLineChart();
     this.updateTemperatureEvolutionChart();
+    this.updateHeartRateEvolutionChart();
+    this.updateOxygenSaturationEvolutionChart();
   }
 
   updateStatsBarChart(): void {
@@ -533,5 +638,288 @@ export class StadisticsComponent implements OnInit {
         }
       ]
     };
+  }
+
+  updateHeartRateEvolutionChart(): void {
+    if (!this.medicalRecords || this.medicalRecords.length === 0) return;
+
+    // Ordenar registros por fecha
+    const sortedRecords = [...this.medicalRecords].sort((a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    // Extraer datos de frecuencia cardíaca y fechas
+    const heartRateData = sortedRecords.map(record => record.heart_rate);
+    const labels = sortedRecords.map(record =>
+      new Date(record.created_at).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    );
+
+    // Obtener estadísticas de frecuencia cardíaca
+    const hrStats = this.statistics.data.estadisticas.frecuencia_cardiaca;
+    const hrParams = this.statistics.data.parametros;
+
+    // Crear líneas de referencia constantes
+    const meanLine = new Array(heartRateData.length).fill(hrStats.media);
+    const medianLine = new Array(heartRateData.length).fill(hrStats.mediana);
+    const stdUpperLine = new Array(heartRateData.length).fill(hrStats.media + hrStats.desviacion_estandar);
+    const stdLowerLine = new Array(heartRateData.length).fill(hrStats.media - hrStats.desviacion_estandar);
+    const tachycardiaLine = new Array(heartRateData.length).fill(hrParams.rango_taquicardia);
+    const bradycardiaLine = new Array(heartRateData.length).fill(hrParams.rango_bradicardia);
+
+    this.heartRateEvolutionChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Frecuencia Cardíaca Registrada',
+          data: heartRateData,
+          backgroundColor: 'rgba(255, 99, 132, 0.6)',
+          borderColor: 'rgba(255, 99, 132, 1)',
+          borderWidth: 3,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.1,
+          fill: false
+        },
+        {
+          label: `Media (${hrStats.media.toFixed(1)} bpm)`,
+          data: meanLine,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `Mediana (${hrStats.mediana.toFixed(1)} bpm)`,
+          data: medianLine,
+          backgroundColor: 'rgba(54, 162, 235, 0.2)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 2,
+          borderDash: [10, 5],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `+1σ (${(hrStats.media + hrStats.desviacion_estandar).toFixed(1)} bpm)`,
+          data: stdUpperLine,
+          backgroundColor: 'rgba(255, 206, 86, 0.1)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1,
+          borderDash: [2, 2],
+          pointRadius: 0,
+          tension: 0,
+          fill: '+1'
+        },
+        {
+          label: `-1σ (${(hrStats.media - hrStats.desviacion_estandar).toFixed(1)} bpm)`,
+          data: stdLowerLine,
+          backgroundColor: 'rgba(255, 206, 86, 0.1)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1,
+          borderDash: [2, 2],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `Límite Taquicardia (${hrParams.rango_taquicardia} bpm)`,
+          data: tachycardiaLine,
+          backgroundColor: 'rgba(220, 53, 69, 0.1)',
+          borderColor: 'rgba(220, 53, 69, 1)',
+          borderWidth: 2,
+          borderDash: [15, 10],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `Límite Bradicardia (${hrParams.rango_bradicardia} bpm)`,
+          data: bradycardiaLine,
+          backgroundColor: 'rgba(0, 123, 255, 0.1)',
+          borderColor: 'rgba(0, 123, 255, 1)',
+          borderWidth: 2,
+          borderDash: [15, 10],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        }
+      ]
+    };
+  }
+
+  updateOxygenSaturationEvolutionChart(): void {
+    if (!this.medicalRecords || this.medicalRecords.length === 0) return;
+
+    // Ordenar registros por fecha
+    const sortedRecords = [...this.medicalRecords].sort((a, b) =>
+      new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+    );
+
+    // Extraer datos de saturación de oxígeno y fechas
+    const oxygenSaturationData = sortedRecords.map(record => record.oxygen_saturation);
+    const labels = sortedRecords.map(record =>
+      new Date(record.created_at).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      })
+    );
+
+    // Obtener estadísticas de saturación de oxígeno
+    const o2Stats = this.statistics.data.estadisticas.saturacion_oxigeno;
+    const o2Params = this.statistics.data.parametros;
+
+    // Crear líneas de referencia constantes
+    const meanLine = new Array(oxygenSaturationData.length).fill(o2Stats.media);
+    const medianLine = new Array(oxygenSaturationData.length).fill(o2Stats.mediana);
+    const stdUpperLine = new Array(oxygenSaturationData.length).fill(o2Stats.media + o2Stats.desviacion_estandar);
+    const stdLowerLine = new Array(oxygenSaturationData.length).fill(o2Stats.media - o2Stats.desviacion_estandar);
+    const lowSaturationLine = new Array(oxygenSaturationData.length).fill(o2Params.rango_baja_saturacion);
+    const normalLine = new Array(oxygenSaturationData.length).fill(95); // Línea de saturación normal
+
+    this.oxygenSaturationEvolutionChartData = {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Saturación O2 Registrada',
+          data: oxygenSaturationData,
+          backgroundColor: 'rgba(54, 162, 235, 0.6)',
+          borderColor: 'rgba(54, 162, 235, 1)',
+          borderWidth: 3,
+          pointRadius: 6,
+          pointHoverRadius: 8,
+          tension: 0.1,
+          fill: false
+        },
+        {
+          label: `Media (${o2Stats.media.toFixed(1)}%)`,
+          data: meanLine,
+          backgroundColor: 'rgba(75, 192, 192, 0.2)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 2,
+          borderDash: [5, 5],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `Mediana (${o2Stats.mediana.toFixed(1)}%)`,
+          data: medianLine,
+          backgroundColor: 'rgba(153, 102, 255, 0.2)',
+          borderColor: 'rgba(153, 102, 255, 1)',
+          borderWidth: 2,
+          borderDash: [10, 5],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `+1σ (${(o2Stats.media + o2Stats.desviacion_estandar).toFixed(1)}%)`,
+          data: stdUpperLine,
+          backgroundColor: 'rgba(255, 206, 86, 0.1)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1,
+          borderDash: [2, 2],
+          pointRadius: 0,
+          tension: 0,
+          fill: '+1'
+        },
+        {
+          label: `-1σ (${(o2Stats.media - o2Stats.desviacion_estandar).toFixed(1)}%)`,
+          data: stdLowerLine,
+          backgroundColor: 'rgba(255, 206, 86, 0.1)',
+          borderColor: 'rgba(255, 206, 86, 1)',
+          borderWidth: 1,
+          borderDash: [2, 2],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: 'Saturación Normal (95%)',
+          data: normalLine,
+          backgroundColor: 'rgba(40, 167, 69, 0.1)',
+          borderColor: 'rgba(40, 167, 69, 1)',
+          borderWidth: 2,
+          borderDash: [15, 10],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        },
+        {
+          label: `Límite Baja Saturación (${o2Params.rango_baja_saturacion}%)`,
+          data: lowSaturationLine,
+          backgroundColor: 'rgba(220, 53, 69, 0.1)',
+          borderColor: 'rgba(220, 53, 69, 1)',
+          borderWidth: 2,
+          borderDash: [15, 10],
+          pointRadius: 0,
+          tension: 0,
+          fill: false
+        }
+      ]
+    };
+  }
+
+  updateChartVisibility(): void {
+    // Resetear todas las visibilidades
+    this.chartVisibility = {
+      statsBar: false,
+      riskRadar: false,
+      rangeComparison: false,
+      temperatureEvolution: false,
+      heartRateEvolution: false,
+      oxygenSaturationEvolution: false
+    };
+
+    // Activar solo los gráficos seleccionados
+    this.selectedCharts.forEach(chart => {
+      if (chart in this.chartVisibility) {
+        (this.chartVisibility as any)[chart] = true;
+      }
+    });
+
+    console.log('Visibilidad de gráficos actualizada:', this.chartVisibility);
+  }
+
+  toggleChart(chartType: string): void {
+    const index = this.selectedCharts.indexOf(chartType);
+    if (index > -1) {
+      this.selectedCharts.splice(index, 1);
+    } else {
+      this.selectedCharts.push(chartType);
+    }
+    this.updateChartVisibility();
+  }
+
+  isChartVisible(chartType: string): boolean {
+    return this.selectedCharts.includes(chartType);
+  }
+
+  selectAllCharts(): void {
+    this.selectedCharts = [...this.chartOptions.map(chart => chart.value)];
+    this.updateChartVisibility();
+  }
+
+  deselectAllCharts(): void {
+    this.selectedCharts = [];
+    this.updateChartVisibility();
+  }
+
+  get allChartsSelected(): boolean {
+    return this.selectedCharts.length === this.chartOptions.length;
+  }
+
+  get noChartsSelected(): boolean {
+    return this.selectedCharts.length === 0;
   }
 }

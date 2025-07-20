@@ -39,8 +39,64 @@
         </div>
     </div>
 
+    <!-- Selector de Gráficos -->
+    <div class="chart-selector" *ngIf="statistics || selectedPatient || currentUser.role === 'patient'">
+        <h3>Seleccionar Gráficos a Mostrar</h3>
+        
+        <!-- Botones de control -->
+        <div class="chart-selector-controls">
+            <button 
+                (click)="selectAllCharts()" 
+                [disabled]="allChartsSelected"
+                class="select-all-btn"
+            >
+                Seleccionar Todos
+            </button>
+            <button 
+                (click)="deselectAllCharts()" 
+                [disabled]="noChartsSelected"
+                class="deselect-all-btn"
+            >
+                Deseleccionar Todos
+            </button>
+        </div>
+
+        <!-- Grid de opciones de gráficos -->
+        <div class="chart-options-grid">
+            <div *ngFor="let chart of chartOptions" 
+                 class="chart-option"
+                 [class.selected]="isChartVisible(chart.value)">
+                <input 
+                    type="checkbox" 
+                    [id]="chart.value" 
+                    [checked]="isChartVisible(chart.value)"
+                    (change)="toggleChart(chart.value)"
+                >
+                <label [for]="chart.value">
+                    {{ chart.label }}
+                </label>
+            </div>
+        </div>
+
+        <!-- Contador de gráficos seleccionados -->
+        <div class="chart-counter">
+            {{ selectedCharts.length }} de {{ chartOptions.length }} gráficos seleccionados
+        </div>
+    </div>
+
+    <!-- Mensaje cuando no hay gráficos seleccionados -->
+    <div class="no-charts-selected" *ngIf="statistics && noChartsSelected">
+        <p-card>
+            <div class="no-data-content">
+                <i class="pi pi-eye-slash" style="font-size: 3rem; color: #6c757d;"></i>
+                <h3>No hay gráficos seleccionados</h3>
+                <p>Seleccione al menos un gráfico para visualizar las estadísticas.</p>
+            </div>
+        </p-card>
+    </div>
+
     <!-- Contenido principal -->
-    <div class="content-section" *ngIf="statistics">
+    <div class="content-section" *ngIf="statistics && !noChartsSelected">
 
         <!-- Resumen general -->
         <div class="summary-cards">
@@ -69,7 +125,7 @@
         <div class="charts-grid">
 
             <!-- Gráfico de Estadísticas -->
-            <div class="chart-container">
+            <div class="chart-container" *ngIf="chartVisibility.statsBar">
                 <p-card header="Estadísticas de Signos Vitales">
                     <div class="chart-wrapper">
                         <canvas baseChart [data]="statsBarChartData" [options]="statsBarChartOptions" type="bar">
@@ -79,7 +135,7 @@
             </div>
 
             <!-- Gráfico de Riesgos -->
-            <div class="chart-container">
+            <div class="chart-container" *ngIf="chartVisibility.riskRadar">
                 <p-card header="Probabilidades de Riesgo">
                     <div class="chart-wrapper">
                         <canvas baseChart [data]="riskRadarChartData" [options]="riskRadarChartOptions" type="radar">
@@ -89,7 +145,7 @@
             </div>
 
             <!-- Gráfico de Comparación con Rangos -->
-            <div class="chart-container full-width">
+            <div class="chart-container full-width" *ngIf="chartVisibility.rangeComparison">
                 <p-card header="Comparación con Rangos de Riesgo">
                     <div class="chart-wrapper">
                         <canvas baseChart [data]="rangeLineChartData" [options]="rangeLineChartOptions" type="line">
@@ -99,7 +155,7 @@
             </div>
 
             <!-- Gráfico de Evolución de Temperatura -->
-            <div class="chart-container full-width">
+            <div class="chart-container full-width" *ngIf="chartVisibility.temperatureEvolution">
                 <p-card header="Evolución de Temperatura con Análisis Estadístico">
                     <div class="chart-wrapper temperature-evolution">
                         <canvas baseChart [data]="temperatureEvolutionChartData"
@@ -124,6 +180,64 @@
                         <div class="stat-info-item">
                             <span class="label">Registros:</span>
                             <span class="value">{{ medicalRecords.length }} mediciones</span>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- Gráfico de Evolución de Frecuencia Cardíaca -->
+            <div class="chart-container full-width" *ngIf="chartVisibility.heartRateEvolution">
+                <p-card header="Evolución de Frecuencia Cardíaca con Análisis Estadístico">
+                    <div class="chart-wrapper heartrate-evolution">
+                        <canvas baseChart [data]="heartRateEvolutionChartData"
+                            [options]="temperatureEvolutionChartOptions" type="line">
+                        </canvas>
+                    </div>
+                    <div class="statistical-info">
+                        <div class="stat-info-item">
+                            <span class="label">Media:</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.media.toFixed(2) }} bpm</span>
+                        </div>
+                        <div class="stat-info-item">
+                            <span class="label">Mediana:</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.mediana.toFixed(2) }} bpm</span>
+                        </div>
+                        <div class="stat-info-item">
+                            <span class="label">Desviación Estándar:</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.desviacion_estandar.toFixed(2) }} bpm</span>
+                        </div>
+                        <div class="stat-info-item">
+                            <span class="label">Rango:</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.rango.toFixed(2) }} bpm</span>
+                        </div>
+                    </div>
+                </p-card>
+            </div>
+
+            <!-- Gráfico de Evolución de Saturación de Oxígeno -->
+            <div class="chart-container full-width" *ngIf="chartVisibility.oxygenSaturationEvolution">
+                <p-card header="Evolución de Saturación de Oxígeno con Análisis Estadístico">
+                    <div class="chart-wrapper oxygen-evolution">
+                        <canvas baseChart [data]="oxygenSaturationEvolutionChartData"
+                            [options]="temperatureEvolutionChartOptions" type="line">
+                        </canvas>
+                    </div>
+                    <div class="statistical-info">
+                        <div class="stat-info-item">
+                            <span class="label">Media:</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.media.toFixed(2) }}%</span>
+                        </div>
+                        <div class="stat-info-item">
+                            <span class="label">Mediana:</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.mediana.toFixed(2) }}%</span>
+                        </div>
+                        <div class="stat-info-item">
+                            <span class="label">Desviación Estándar:</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.desviacion_estandar.toFixed(2) }}%</span>
+                        </div>
+                        <div class="stat-info-item">
+                            <span class="label">Rango:</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.rango.toFixed(2) }}%</span>
                         </div>
                     </div>
                 </p-card>
