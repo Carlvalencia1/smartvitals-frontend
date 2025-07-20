@@ -62,7 +62,7 @@ export class PanelComponent implements OnInit, OnDestroy {
     spo2: true,
     temperature: true,
     bloodPressure: true,
-    eeg: true
+    ecg: true
   };
 
   // Opciones para el selector de gráficos
@@ -71,10 +71,10 @@ export class PanelComponent implements OnInit, OnDestroy {
     { label: 'Saturación de Oxígeno', value: 'spo2', icon: 'pi-circle' },
     { label: 'Temperatura Corporal', value: 'temperature', icon: 'pi-sun' },
     { label: 'Presión Arterial', value: 'bloodPressure', icon: 'pi-chart-line' },
-    { label: 'Electroencefalograma', value: 'eeg', icon: 'pi-wave-pulse' }
+    { label: 'Electrocardiograma', value: 'ecg', icon: 'pi-wave-pulse' }
   ];
 
-  selectedCharts: string[] = ['heartRate', 'spo2', 'temperature', 'bloodPressure', 'eeg'];
+  selectedCharts: string[] = ['heartRate', 'spo2', 'temperature', 'bloodPressure', 'ecg'];
 
   // Datos en tiempo real (inicialmente vacíos)
   realTimeData = {
@@ -157,11 +157,11 @@ export class PanelComponent implements OnInit, OnDestroy {
     ]
   };
 
-  // Datos para EEG
-  public eegChartData: ChartData<'line'> = {
+  // Datos para ECG
+  public ecgChartData: ChartData<'line'> = {
     labels: [],
     datasets: [{
-      label: 'Señal EEG (µV)',
+      label: 'Señal ECG (mV)',
       data: [],
       borderColor: '#AB47BC',
       backgroundColor: 'rgba(171, 71, 188, 0.1)',
@@ -348,6 +348,55 @@ export class PanelComponent implements OnInit, OnDestroy {
         max: 200,
         ticks: {
           stepSize: 20
+        }
+      }
+    },
+    interaction: {
+      intersect: false,
+      mode: 'index'
+    },
+    animation: {
+      duration: 300
+    }
+  };
+
+  public ecgChartOptions: ChartConfiguration<'line'>['options'] = {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: {
+      legend: {
+        display: true,
+        position: 'top'
+      },
+      tooltip: {
+        mode: 'index',
+        intersect: false,
+        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+        titleColor: 'white',
+        bodyColor: 'white'
+      }
+    },
+    scales: {
+      x: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Tiempo'
+        },
+        ticks: {
+          maxTicksLimit: 10
+        }
+      },
+      y: {
+        display: true,
+        title: {
+          display: true,
+          text: 'Señal ECG (mV)'
+        },
+        min: 0,
+        max: 500,
+        ticks: {
+          stepSize: 50
         }
       }
     },
@@ -653,6 +702,14 @@ export class PanelComponent implements OnInit, OnDestroy {
           this.updateHeartRateChart(data.heart_rate);
         }
         break;
+      case 'ecg':
+        if (data.ecg_values || data.ecg) {
+          const ecgData = data.ecg_values || data.ecg;
+          if (Array.isArray(ecgData) && ecgData.length > 0) {
+            this.updateEcgChart(ecgData[0]); // Tomar el primer valor del array
+          }
+        }
+        break;
     }
   }
 
@@ -793,6 +850,37 @@ export class PanelComponent implements OnInit, OnDestroy {
     };
   }
 
+  private updateEcgChart(value: number) {
+    const maxDataPoints = 20;
+    const currentTime = new Date().toLocaleTimeString('es-ES', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit'
+    });
+
+    if (this.ecgChartData.labels && this.ecgChartData.labels.length >= maxDataPoints) {
+      this.ecgChartData.labels.shift();
+      if (this.ecgChartData.datasets[0]?.data) {
+        this.ecgChartData.datasets[0].data.shift();
+      }
+    }
+
+    if (this.ecgChartData.labels) {
+      this.ecgChartData.labels.push(currentTime);
+    }
+    if (this.ecgChartData.datasets[0]?.data) {
+      this.ecgChartData.datasets[0].data.push(value);
+    }
+
+    this.ecgChartData = {
+      labels: this.ecgChartData.labels ? [...this.ecgChartData.labels] : [],
+      datasets: [{
+        ...this.ecgChartData.datasets[0],
+        data: this.ecgChartData.datasets[0]?.data ? [...this.ecgChartData.datasets[0].data] : []
+      }]
+    };
+  }
+
   clearAlerts() {
     this.alerts = [];
   }
@@ -887,10 +975,10 @@ export class PanelComponent implements OnInit, OnDestroy {
       ]
     };
 
-    this.eegChartData = {
+    this.ecgChartData = {
       labels: [],
       datasets: [{
-        label: 'Señal EEG (µV)',
+        label: 'Señal ECG (mV)',
         data: [],
         borderColor: '#AB47BC',
         backgroundColor: 'rgba(171, 71, 188, 0.1)',
@@ -915,7 +1003,7 @@ export class PanelComponent implements OnInit, OnDestroy {
       spo2: false,
       temperature: false,
       bloodPressure: false,
-      eeg: false
+      ecg: false
     };
 
     // Activar solo los gráficos seleccionados

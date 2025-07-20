@@ -23,72 +23,140 @@
         </div>
 
         <!-- Filtros -->
-        <div class="bg-[#d1cbcb] rounded-xl shadow p-4 mb-4 max-w-3xl mx-auto border border-gray-400">
-            <h3 class="font-semibold mb-2">Filtros</h3>
-            <div class="flex flex-col md:flex-row gap-2 md:gap-4">
+        <div class="bg-white rounded-xl shadow-lg p-6 mb-6 max-w-4xl mx-auto border border-gray-200">
+            <!-- Encabezado de filtros -->
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-700 flex items-center">
+                    <i class="pi pi-filter mr-2 text-blue-600"></i>
+                    Filtros de Búsqueda
+                </h3>
+                <button pButton type="button" label="Aplicar Filtros" icon="pi pi-check"
+                    class="p-button-sm p-button-info" (click)="applyFilters()">
+                </button>
+            </div>
+
+            <!-- Grid de filtros -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 <!-- Selector de paciente -->
-                <div class="w-full md:w-1/3" *ngIf="currentUser.role === 'doctor'">
+                <div class="flex flex-col" *ngIf="currentUser.role === 'doctor'">
+                    <label class="text-sm font-medium text-gray-600 mb-2">Paciente</label>
                     <p-select [options]="patientOptions" [(ngModel)]="selectedPatient"
-                        placeholder="Seleccionar paciente" styleClass="w-full border border-gray-300 rounded"
+                        placeholder="Seleccionar paciente" styleClass="w-full h-10" panelStyleClass="shadow-lg"
                         optionLabel="label">
                     </p-select>
                 </div>
 
                 <!-- Selector de rango de fechas -->
-                <div class="w-full md:w-1/3">
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-gray-600 mb-2">Rango de Fechas</label>
                     <p-datePicker [(ngModel)]="rangeDates" selectionMode="range" [readonlyInput]="true"
-                        placeholder="Rango de fechas" dateFormat="dd/mm/yy"
-                        styleClass="w-full border border-gray-300 rounded" [showIcon]="true">
+                        placeholder="Seleccionar fechas" dateFormat="dd/mm/yy" styleClass="w-full h-10"
+                        [showIcon]="true" panelStyleClass="shadow-lg">
                     </p-datePicker>
                 </div>
 
                 <!-- Número de expediente -->
-                <div class="w-full md:w-1/3">
-                    <input pInputText [(ngModel)]="recordNumber" placeholder="# del expediente"
-                        class="w-full border border-gray-300 rounded" />
+                <div class="flex flex-col">
+                    <label class="text-sm font-medium text-gray-600 mb-2">Número de Expediente</label>
+                    <input pInputText [(ngModel)]="recordNumber" placeholder="Ej: 1244"
+                        class="w-full h-10 px-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors" />
                 </div>
-            </div>
-
-            <!-- Botón para aplicar filtros -->
-            <div class="flex justify-end mt-3">
-                <button pButton type="button" label="Aplicar filtros" icon="pi pi-filter" class="p-button-sm"
-                    (click)="applyFilters()">
-                </button>
             </div>
         </div>
 
         <!-- Tabla de expedientes -->
-        <div class="bg-white rounded-xl shadow p-4 max-w-3xl mx-auto overflow-x-auto">
-            <table class="w-full text-left">
-                <thead>
-                    <tr class="border-b">
-                        <th class="py-2">#</th>
-                        <th class="py-2" *ngIf="currentUser.role === 'doctor'">Paciente</th>
-                        <th class="py-2">Fecha</th>
-                        <th class="py-2">Descargar</th>
-                        <th class="py-2">Enviar</th>
+        <div class="bg-white rounded-xl shadow-lg p-6 max-w-4xl mx-auto border border-gray-200">
+            <p-table #dt [value]="records" [paginator]="true" [rows]="10" [showCurrentPageReport]="true"
+                currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} expedientes"
+                [rowsPerPageOptions]="[5, 10, 20]" [globalFilterFields]="['id', 'patient.name', 'created_at']"
+                styleClass="p-datatable-striped" responsiveLayout="scroll">
+
+                <ng-template pTemplate="caption">
+                    <div class="flex justify-between items-center">
+                        <h3 class="text-lg font-semibold">Expedientes Médicos</h3>
+                        <span class="p-input-icon-left">
+                            <i class="pi pi-search"></i>
+                            <input pInputText type="text" #searchInput
+                                (input)="dt.filterGlobal(searchInput.value, 'contains')"
+                                placeholder="Buscar expedientes..." class="w-64" />
+                        </span>
+                    </div>
+                </ng-template>
+
+                <ng-template pTemplate="header">
+                    <tr>
+                        <th pSortableColumn="id" class="w-20">
+                            <div class="flex align-items-center">
+                                # Expediente
+                                <p-sortIcon field="id"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="patient.name" *ngIf="currentUser.role === 'doctor'" class="w-48">
+                            <div class="flex align-items-center">
+                                Paciente
+                                <p-sortIcon field="patient.name"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th pSortableColumn="created_at" class="w-32">
+                            <div class="flex align-items-center">
+                                Fecha
+                                <p-sortIcon field="created_at"></p-sortIcon>
+                            </div>
+                        </th>
+                        <th class="w-24 text-center">Acciones</th>
                     </tr>
-                </thead>
-                <tbody>
-                    <tr class="border-b" *ngFor="let expediente of records">
-                        <td class="py-2">
+                </ng-template>
+
+                <ng-template pTemplate="body" let-expediente>
+                    <tr>
+                        <td>
                             <a [routerLink]="['/record', expediente.id]"
-                                class="text-blue-600 hover:underline cursor-pointer">{{ expediente.id }}</a>
+                                class="text-blue-600 hover:text-blue-800 font-medium hover:underline cursor-pointer flex items-center">
+                                <i class="pi pi-file-o mr-2"></i>
+                                {{ expediente.id }}
+                            </a>
                         </td>
-                        <td class="py-2" *ngIf="currentUser.role === 'doctor'">{{ expediente.patient.name }}</td>
-                        <td class="py-2">{{ expediente.created_at | date: 'dd/MM/yyyy' }}</td>
-                        <td class="py-2 text-center">
-                            <button pButton type="button" icon="pi pi-download"
-                                class="p-button-text p-button-sm p-button-rounded"
-                                (click)="downloadRecordPDF(expediente.id)" [loading]="isDownloading(expediente.id)"
-                                [disabled]="isDownloading(expediente.id)" pTooltip="Descargar PDF">
-                            </button>
+                        <td *ngIf="currentUser.role === 'doctor'">
+                            <div class="flex items-center">
+                                <i class="pi pi-user mr-2 text-gray-500"></i>
+                                {{ expediente.patient.name }} {{ expediente.patient.lastname }}
+                            </div>
                         </td>
-                        <td class="py-2 text-center"><i class="pi pi-send"></i></td>
+                        <td>
+                            <span class="bg-gray-100 text-gray-800 px-2 py-1 rounded-full text-sm">
+                                {{ expediente.created_at | date: 'dd/MM/yyyy' }}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="flex justify-center gap-2">
+                                <button pButton type="button" icon="pi pi-download"
+                                    class="p-button-text p-button-sm p-button-rounded p-button-info"
+                                    (click)="downloadRecordPDF(expediente.id)" [loading]="isDownloading(expediente.id)"
+                                    [disabled]="isDownloading(expediente.id)" pTooltip="Descargar PDF"
+                                    tooltipPosition="top">
+                                </button>
+                                <button pButton type="button" icon="pi pi-send"
+                                    class="p-button-text p-button-sm p-button-rounded p-button-success"
+                                    pTooltip="Enviar por email" tooltipPosition="top">
+                                </button>
+                            </div>
+                        </td>
                     </tr>
-                    <!-- Repite para cada expediente -->
-                </tbody>
-            </table>
+                </ng-template>
+
+                <ng-template pTemplate="emptymessage">
+                    <tr>
+                        <td [attr.colspan]="currentUser.role === 'doctor' ? 4 : 3" class="text-center py-8">
+                            <div class="flex flex-col items-center">
+                                <i class="pi pi-inbox text-4xl text-gray-400 mb-3"></i>
+                                <h4 class="text-lg font-medium text-gray-600 mb-2">No hay expedientes</h4>
+                                <p class="text-gray-500">No se encontraron expedientes médicos con los filtros
+                                    aplicados.</p>
+                            </div>
+                        </td>
+                    </tr>
+                </ng-template>
+            </p-table>
         </div>
     </main>
 </div>

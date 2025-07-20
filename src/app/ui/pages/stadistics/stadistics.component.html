@@ -42,36 +42,22 @@
     <!-- Selector de Gráficos -->
     <div class="chart-selector" *ngIf="statistics || selectedPatient || currentUser.role === 'patient'">
         <h3>Seleccionar Gráficos a Mostrar</h3>
-        
+
         <!-- Botones de control -->
         <div class="chart-selector-controls">
-            <button 
-                (click)="selectAllCharts()" 
-                [disabled]="allChartsSelected"
-                class="select-all-btn"
-            >
+            <button (click)="selectAllCharts()" [disabled]="allChartsSelected" class="select-all-btn">
                 Seleccionar Todos
             </button>
-            <button 
-                (click)="deselectAllCharts()" 
-                [disabled]="noChartsSelected"
-                class="deselect-all-btn"
-            >
+            <button (click)="deselectAllCharts()" [disabled]="noChartsSelected" class="deselect-all-btn">
                 Deseleccionar Todos
             </button>
         </div>
 
         <!-- Grid de opciones de gráficos -->
         <div class="chart-options-grid">
-            <div *ngFor="let chart of chartOptions" 
-                 class="chart-option"
-                 [class.selected]="isChartVisible(chart.value)">
-                <input 
-                    type="checkbox" 
-                    [id]="chart.value" 
-                    [checked]="isChartVisible(chart.value)"
-                    (change)="toggleChart(chart.value)"
-                >
+            <div *ngFor="let chart of chartOptions" class="chart-option" [class.selected]="isChartVisible(chart.value)">
+                <input type="checkbox" [id]="chart.value" [checked]="isChartVisible(chart.value)"
+                    (change)="toggleChart(chart.value)">
                 <label [for]="chart.value">
                     {{ chart.label }}
                 </label>
@@ -196,19 +182,24 @@
                     <div class="statistical-info">
                         <div class="stat-info-item">
                             <span class="label">Media:</span>
-                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.media.toFixed(2) }} bpm</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.media.toFixed(2) }}
+                                bpm</span>
                         </div>
                         <div class="stat-info-item">
                             <span class="label">Mediana:</span>
-                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.mediana.toFixed(2) }} bpm</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.mediana.toFixed(2)
+                                }} bpm</span>
                         </div>
                         <div class="stat-info-item">
                             <span class="label">Desviación Estándar:</span>
-                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.desviacion_estandar.toFixed(2) }} bpm</span>
+                            <span class="value">{{
+                                statistics.data.estadisticas.frecuencia_cardiaca.desviacion_estandar.toFixed(2) }}
+                                bpm</span>
                         </div>
                         <div class="stat-info-item">
                             <span class="label">Rango:</span>
-                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.rango.toFixed(2) }} bpm</span>
+                            <span class="value">{{ statistics.data.estadisticas.frecuencia_cardiaca.rango.toFixed(2) }}
+                                bpm</span>
                         </div>
                     </div>
                 </p-card>
@@ -225,19 +216,24 @@
                     <div class="statistical-info">
                         <div class="stat-info-item">
                             <span class="label">Media:</span>
-                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.media.toFixed(2) }}%</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.media.toFixed(2)
+                                }}%</span>
                         </div>
                         <div class="stat-info-item">
                             <span class="label">Mediana:</span>
-                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.mediana.toFixed(2) }}%</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.mediana.toFixed(2)
+                                }}%</span>
                         </div>
                         <div class="stat-info-item">
                             <span class="label">Desviación Estándar:</span>
-                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.desviacion_estandar.toFixed(2) }}%</span>
+                            <span class="value">{{
+                                statistics.data.estadisticas.saturacion_oxigeno.desviacion_estandar.toFixed(2)
+                                }}%</span>
                         </div>
                         <div class="stat-info-item">
                             <span class="label">Rango:</span>
-                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.rango.toFixed(2) }}%</span>
+                            <span class="value">{{ statistics.data.estadisticas.saturacion_oxigeno.rango.toFixed(2)
+                                }}%</span>
                         </div>
                     </div>
                 </p-card>
