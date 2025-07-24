@@ -136,8 +136,9 @@
             <!-- Gráfico de Riesgos -->
             <div class="chart-container" *ngIf="chartVisibility.riskRadar">
                 <p-card header="Probabilidades de Riesgo">
-                    <div class="chart-wrapper">
-                        <canvas baseChart [data]="riskRadarChartData" [options]="riskRadarChartOptions" type="radar">
+                    <div class="chart-wrapper doughnut-chart">
+                        <canvas baseChart [data]="riskDoughnutChartData" [options]="riskDoughnutChartOptions"
+                            type="doughnut">
                         </canvas>
                     </div>
                 </p-card>

@@ -102,6 +102,13 @@
   position: relative;
 }
 
+.chart-wrapper.doughnut-chart {
+  height: 450px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .chart-wrapper canvas {
   max-height: 100% !important;
 }
@@ -615,4 +622,18 @@
 
 :host ::ng-deep .p-toast .p-toast-message .p-toast-message-content {
   padding: 1rem;
+}
+
+.clinical-combinations .combination-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.combination-item .label {
+  font-weight: 600;
+  margin-right: 0.5rem;
+}
+.combination-item .value {
+  color: #007bff;
+  font-weight: bold;
 }

@@ -5,6 +5,7 @@ import { environment } from '../../../environments/environment';
 import { SensorData } from './models/sensorData';
 import { AlertData } from './models/alert-data';
 import { WebSocketMessage } from './models/websocket-message';
+import { MedicalRecordCreated } from './models/medical-record-created';
 
 @Injectable({
   providedIn: 'root'
@@ -22,6 +23,7 @@ export class WebsocketService {
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
   private sensorStatusSubject = new BehaviorSubject<any>(null);
   private monitoringStatusSubject = new BehaviorSubject<boolean>(false);
+  private medicalRecordCreatedSubject = new Subject<MedicalRecordCreated>();
 
   constructor(private authService: AuthService) { }
 
@@ -31,6 +33,7 @@ export class WebsocketService {
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
   public sensorStatus$ = this.sensorStatusSubject.asObservable();
   public monitoringStatus$ = this.monitoringStatusSubject.asObservable();
+  public medicalRecordCreated$ = this.medicalRecordCreatedSubject.asObservable();
 
   connect(): void {
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
@@ -59,7 +62,22 @@ export class WebsocketService {
       try {
         const message: WebSocketMessage = JSON.parse(event.data);
 
-        // Solo procesar datos si el monitoreo está activo
+        // Manejar notificaciones de expedientes médicos creados (sin necesidad de monitoreo activo)
+        if (message.type === 'medical_record_created') {
+          const medicalRecordData: MedicalRecordCreated = {
+            type: 'medical_record_created',
+            patient_id: message.patient_id!,
+            doctor_id: message.doctor_id!,
+            record_id: message.record_id!,
+            timestamp: message.timestamp!,
+            data: message.data,
+            message: message.message!
+          };
+          this.medicalRecordCreatedSubject.next(medicalRecordData);
+          return; // Procesar este mensaje independientemente del estado de monitoreo
+        }
+
+        // Solo procesar datos de sensores si el monitoreo está activo
         if (this.isMonitoring) {
           // Soporte para estado de sensores
           if (message.topic === 'sensor') {

@@ -4,6 +4,8 @@ export interface WebSocketMessage {
     type?: string;
     patient_id?: number;
     doctor_id?: number;
+    record_id?: number;
+    timestamp?: number;
+    message?: string;
     alertas?: string[];
 }
-  

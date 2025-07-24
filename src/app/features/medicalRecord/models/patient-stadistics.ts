@@ -68,6 +68,11 @@ export interface PatientStadistics {
       "rango_hipertension": number,
       "rango_hipotension": number,
       "rango_baja_saturacion": number
+    },
+    "combinaciones_clinicas"?: {
+      probabilidad_agitacion?: number,
+      probabilidad_shock?: number
+      // Puedes agregar más combinaciones clínicas aquí si tu backend las devuelve
     }
   },
   "records": Record[];

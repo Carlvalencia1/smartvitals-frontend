@@ -80,7 +80,7 @@ export class StadisticsComponent implements OnInit {
   // Configuraciones de gráficos
   public barChartType: ChartType = 'bar';
   public lineChartType: ChartType = 'line';
-  public radarChartType: ChartType = 'radar';
+  public doughnutChartType: ChartType = 'doughnut';
 
   // Datos para gráfico de barras (estadísticas)
   public statsBarChartData: ChartData<'bar'> = {
@@ -101,32 +101,53 @@ export class StadisticsComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Estadísticas de Signos Vitales'
+        // text: 'Estadísticas de Signos Vitales'
       }
     }
   };
 
-  // Datos para gráfico de riesgos (radar)
-  public riskRadarChartData: ChartData<'radar'> = {
+  // Datos para gráfico de riesgos (doughnut)
+  public riskDoughnutChartData: ChartData<'doughnut'> = {
     labels: [],
     datasets: []
   };
 
-  public riskRadarChartOptions: ChartConfiguration<'radar'>['options'] = {
+  public riskDoughnutChartOptions: ChartConfiguration<'doughnut'>['options'] = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
-        display: true
+        display: true,
+        position: 'right',
+        labels: {
+          usePointStyle: true,
+          padding: 20
+        }
       },
       title: {
         display: true,
-        text: 'Probabilidades de Riesgo (%)'
+        // text: 'Probabilidades de Riesgo (%)',
+        font: {
+          size: 16,
+          weight: 'bold'
+        }
+      },
+      tooltip: {
+        callbacks: {
+          label: function (context) {
+            const value = context.parsed;
+            const total = context.dataset.data.reduce((a: number, b: number) => a + b, 0);
+            const percentage = ((value / total) * 100).toFixed(1);
+            return `${context.label}: ${value.toFixed(1)}% (${percentage}% del total)`;
+          }
+        }
       }
     },
-    scales: {
-      r: {
-        beginAtZero: true,
-        max: 100
+    cutout: '60%', // Esto hace que sea un anillo en lugar de un círculo completo
+    elements: {
+      arc: {
+        borderWidth: 2,
+        borderColor: '#fff'
       }
     }
   };
@@ -145,7 +166,7 @@ export class StadisticsComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Comparación con Rangos de Riesgo'
+        // text: 'Comparación con Rangos de Riesgo'
       }
     },
     scales: {
@@ -169,7 +190,7 @@ export class StadisticsComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Evolución de Temperatura con Análisis Estadístico'
+        // text: 'Evolución de Temperatura con Análisis Estadístico'
       }
     },
     scales: {
@@ -207,7 +228,7 @@ export class StadisticsComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Evolución de Frecuencia Cardíaca con Análisis Estadístico'
+        // text: 'Evolución de Frecuencia Cardíaca con Análisis Estadístico'
       }
     },
     scales: {
@@ -245,7 +266,7 @@ export class StadisticsComponent implements OnInit {
       },
       title: {
         display: true,
-        text: 'Evolución de Saturación de Oxígeno con Análisis Estadístico'
+        // text: 'Evolución de Saturación de Oxígeno con Análisis Estadístico'
       }
     },
     scales: {
@@ -561,7 +582,7 @@ export class StadisticsComponent implements OnInit {
     if (!this.statistics) return;
 
     this.updateStatsBarChart();
-    this.updateRiskRadarChart();
+    this.updateRiskDoughnutChart();
     this.updateRangeLineChart();
     this.updateTemperatureEvolutionChart();
     this.updateHeartRateEvolutionChart();
@@ -599,47 +620,47 @@ export class StadisticsComponent implements OnInit {
     };
   }
 
-  updateRiskRadarChart(): void {
+  updateRiskDoughnutChart(): void {
     const risks = this.statistics.data.probabilidades_riesgo;
 
     if (!risks) return;
 
-    this.riskRadarChartData = {
-      labels: [
-        'Taquicardia',
-        'Bradicardia',
-        'Taquipnea',
-        'Bradipnea',
-        'Fiebre',
-        'Hipotermia',
-        'Hipertensión',
-        'Hipotensión',
-        'Baja Saturación'
-      ],
-      datasets: [
-        {
-          label: 'Probabilidad de Riesgo (%)',
-          data: [
-            risks.riesgo_taquicardia,
-            risks.riesgo_bradicardia,
-            risks.riesgo_taquipnea,
-            risks.riesgo_bradipnea,
-            risks.riesgo_fiebre,
-            risks.riesgo_hipotermia,
-            risks.riesgo_hipertension,
-            risks.riesgo_hipotension,
-            risks.riesgo_baja_saturacion
-          ],
-          backgroundColor: 'rgba(255, 99, 132, 0.2)',
-          borderColor: 'rgba(255, 99, 132, 1)',
+    // Filtrar solo los riesgos que tienen valores mayores a 0 para una mejor visualización
+    const riskEntries = [
+      { label: 'Taquicardia', value: risks.riesgo_taquicardia, color: '#FF6384' },
+      { label: 'Bradicardia', value: risks.riesgo_bradicardia, color: '#36A2EB' },
+      { label: 'Taquipnea', value: risks.riesgo_taquipnea, color: '#FFCE56' },
+      { label: 'Bradipnea', value: risks.riesgo_bradipnea, color: '#4BC0C0' },
+      { label: 'Fiebre', value: risks.riesgo_fiebre, color: '#9966FF' },
+      { label: 'Hipotermia', value: risks.riesgo_hipotermia, color: '#FF9F40' },
+      { label: 'Hipertensión', value: risks.riesgo_hipertension, color: '#FF6B6B' },
+      { label: 'Hipotensión', value: risks.riesgo_hipotension, color: '#4ECDC4' },
+      { label: 'Baja Saturación', value: risks.riesgo_baja_saturacion, color: '#45B7D1' }
+    ].filter(risk => risk.value > 0); // Solo mostrar riesgos con valores mayores a 0
+
+    // Si no hay riesgos, mostrar un mensaje en el centro
+    if (riskEntries.length === 0) {
+      this.riskDoughnutChartData = {
+        labels: ['Sin riesgos detectados'],
+        datasets: [{
+          data: [100],
+          backgroundColor: ['#28a745'],
+          borderColor: ['#fff'],
+          borderWidth: 2
+        }]
+      };
+    } else {
+      this.riskDoughnutChartData = {
+        labels: riskEntries.map(risk => risk.label),
+        datasets: [{
+          data: riskEntries.map(risk => risk.value),
+          backgroundColor: riskEntries.map(risk => risk.color),
+          borderColor: '#fff',
           borderWidth: 2,
-          pointBackgroundColor: 'rgba(255, 99, 132, 1)',
-          pointBorderColor: '#fff',
-          pointHoverBackgroundColor: '#fff',
-          pointHoverBorderColor: 'rgba(255, 99, 132, 1)'
-        }
-      ]
-    };
+          hoverOffset: 4
+        }]
+      };
+    }
   }
 
   updateRangeLineChart(): void {
