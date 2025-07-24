@@ -170,6 +170,12 @@ body {
     background-color: rgba(70, 149, 189, 0.1) !important;
 }
 
+/* Mejorar visibilidad del icono en botones info-text (como descargar PDF) */
+.p-button.p-button-info.p-button-text .p-button-icon {
+    color: #4695BD !important;
+    opacity: 1 !important;
+}
+
 /* Botones pequeños */
 .p-button.p-button-sm {
     font-size: 0.875rem;
