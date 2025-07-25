@@ -191,15 +191,29 @@
 
       <div class="lg:col-span-2" *ngIf="chartVisibility.bloodPressure">
         <p-card header="Presión Arterial" styleClass="h-full">
-          <div class="flex items-center justify-between mb-2">
+          <div class="flex items-center justify-between mb-4">
             <span class="text-2xl font-bold text-green-500">
               {{ realTimeData.bloodPressure.systolic || 0 }}/{{ realTimeData.bloodPressure.diastolic || 0 }} mmHg
             </span>
             <span class="text-sm text-gray-500">Tiempo Real</span>
           </div>
-          <div class="chart-container" style="height: 200px;">
-            <canvas baseChart [data]="bloodPressureChartData" [options]="bloodPressureChartOptions" type="line">
-            </canvas>
+          <div class="grid grid-cols-2 gap-4 mt-6">
+            <div class="text-center p-4 bg-gray-50 rounded-lg">
+              <div class="text-3xl font-bold text-green-600 mb-2">
+                {{ realTimeData.bloodPressure.systolic || 0 }}
+              </div>
+              <div class="text-sm text-gray-600 font-semibold">
+                Sistólica (mmHg)
+              </div>
+            </div>
+            <div class="text-center p-4 bg-gray-50 rounded-lg">
+              <div class="text-3xl font-bold text-green-600 mb-2">
+                {{ realTimeData.bloodPressure.diastolic || 0 }}
+              </div>
+              <div class="text-sm text-gray-600 font-semibold">
+                Diastólica (mmHg)
+              </div>
+            </div>
           </div>
         </p-card>
       </div>

@@ -129,35 +129,6 @@ export class PanelComponent implements OnInit, OnDestroy {
     }]
   };
 
-  // Datos para presión arterial
-  public bloodPressureChartData: ChartData<'line'> = {
-    labels: [],
-    datasets: [
-      {
-        label: 'Sistólica (mmHg)',
-        data: [],
-        borderColor: '#66BB6A',
-        backgroundColor: 'rgba(102, 187, 106, 0.1)',
-        borderWidth: 2,
-        fill: false,
-        tension: 0.4,
-        pointRadius: 3,
-        pointHoverRadius: 6
-      },
-      {
-        label: 'Diastólica (mmHg)',
-        data: [],
-        borderColor: '#FF7043',
-        backgroundColor: 'rgba(255, 112, 67, 0.1)',
-        borderWidth: 2,
-        fill: false,
-        tension: 0.4,
-        pointRadius: 3,
-        pointHoverRadius: 6
-      }
-    ]
-  };
-
   // Datos para ECG
   public ecgChartData: ChartData<'line'> = {
     labels: [],
@@ -306,55 +277,6 @@ export class PanelComponent implements OnInit, OnDestroy {
           stepSize: 2
         }
       }
-    },
-    animation: {
-      duration: 300
-    }
-  };
-
-  public bloodPressureChartOptions: ChartConfiguration<'line'>['options'] = {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: {
-        display: true,
-        position: 'top'
-      },
-      tooltip: {
-        mode: 'index',
-        intersect: false,
-        backgroundColor: 'rgba(0, 0, 0, 0.8)',
-        titleColor: 'white',
-        bodyColor: 'white'
-      }
-    },
-    scales: {
-      x: {
-        display: true,
-        title: {
-          display: true,
-          text: 'Tiempo'
-        },
-        ticks: {
-          maxTicksLimit: 10
-        }
-      },
-      y: {
-        display: true,
-        title: {
-          display: true,
-          text: 'Presión Arterial (mmHg)'
-        },
-        min: 40,
-        max: 200,
-        ticks: {
-          stepSize: 20
-        }
-      }
-    },
-    interaction: {
-      intersect: false,
-      mode: 'index'
     },
     animation: {
       duration: 300
@@ -713,7 +635,7 @@ export class PanelComponent implements OnInit, OnDestroy {
           // Asumiendo que blood_pressure viene como "120/80"
           const [systolic, diastolic] = data.blood_pressure.toString().split('/').map(Number);
           this.realTimeData.bloodPressure = { systolic, diastolic };
-          this.updateBloodPressureChart(systolic, diastolic);
+          console.log(`Presión arterial actualizada: ${systolic}/${diastolic} mmHg`);
         }
         break;
       case 'ritmo_cardiaco':
@@ -827,49 +749,6 @@ export class PanelComponent implements OnInit, OnDestroy {
     };
   }
 
-  private updateBloodPressureChart(systolic: number, diastolic: number) {
-    const maxDataPoints = 20;
-    const currentTime = new Date().toLocaleTimeString('es-ES', {
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit'
-    });
-
-    if (this.bloodPressureChartData.labels && this.bloodPressureChartData.labels.length >= maxDataPoints) {
-      this.bloodPressureChartData.labels.shift();
-      if (this.bloodPressureChartData.datasets[0]?.data) {
-        this.bloodPressureChartData.datasets[0].data.shift();
-      }
-      if (this.bloodPressureChartData.datasets[1]?.data) {
-        this.bloodPressureChartData.datasets[1].data.shift();
-      }
-    }
-
-    if (this.bloodPressureChartData.labels) {
-      this.bloodPressureChartData.labels.push(currentTime);
-    }
-    if (this.bloodPressureChartData.datasets[0]?.data) {
-      this.bloodPressureChartData.datasets[0].data.push(systolic);
-    }
-    if (this.bloodPressureChartData.datasets[1]?.data) {
-      this.bloodPressureChartData.datasets[1].data.push(diastolic);
-    }
-
-    this.bloodPressureChartData = {
-      labels: this.bloodPressureChartData.labels ? [...this.bloodPressureChartData.labels] : [],
-      datasets: [
-        {
-          ...this.bloodPressureChartData.datasets[0],
-          data: this.bloodPressureChartData.datasets[0]?.data ? [...this.bloodPressureChartData.datasets[0].data] : []
-        },
-        {
-          ...this.bloodPressureChartData.datasets[1],
-          data: this.bloodPressureChartData.datasets[1]?.data ? [...this.bloodPressureChartData.datasets[1].data] : []
-        }
-      ]
-    };
-  }
-
   private updateEcgChart(value: number) {
     const maxDataPoints = 20;
     const currentTime = new Date().toLocaleTimeString('es-ES', {
@@ -965,34 +844,6 @@ export class PanelComponent implements OnInit, OnDestroy {
         borderColor: '#FB8C00',
         borderWidth: 1
       }]
-    };
-
-    this.bloodPressureChartData = {
-      labels: [],
-      datasets: [
-        {
-          label: 'Sistólica (mmHg)',
-          data: [],
-          borderColor: '#66BB6A',
-          backgroundColor: 'rgba(102, 187, 106, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.4,
-          pointRadius: 3,
-          pointHoverRadius: 6
-        },
-        {
-          label: 'Diastólica (mmHg)',
-          data: [],
-          borderColor: '#FF7043',
-          backgroundColor: 'rgba(255, 112, 67, 0.1)',
-          borderWidth: 2,
-          fill: false,
-          tension: 0.4,
-          pointRadius: 3,
-          pointHoverRadius: 6
-        }
-      ]
     };
 
     this.ecgChartData = {
