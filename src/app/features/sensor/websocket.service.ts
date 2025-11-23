@@ -14,13 +14,14 @@ export class WebsocketService {
   private socket: WebSocket | null = null;
   private isConnected = false;
   private reconnectAttempts = 0;
-  private maxReconnectAttempts = 5;
+  // private maxReconnectAttempts = 5; // Removed limit
   private isMonitoring = false;
 
   // Observables para datos y alertas
   private sensorDataSubject = new BehaviorSubject<SensorData | null>(null);
   private alertSubject = new Subject<AlertData>();
   private connectionStatusSubject = new BehaviorSubject<boolean>(false);
+  private connectionStateSubject = new BehaviorSubject<string>('disconnected'); // New detailed state
   private sensorStatusSubject = new BehaviorSubject<any>(null);
   private monitoringStatusSubject = new BehaviorSubject<boolean>(false);
   private medicalRecordCreatedSubject = new Subject<MedicalRecordCreated>();
@@ -31,6 +32,7 @@ export class WebsocketService {
   public sensorData$ = this.sensorDataSubject.asObservable();
   public alerts$ = this.alertSubject.asObservable();
   public connectionStatus$ = this.connectionStatusSubject.asObservable();
+  public connectionState$ = this.connectionStateSubject.asObservable(); // New public observable
   public sensorStatus$ = this.sensorStatusSubject.asObservable();
   public monitoringStatus$ = this.monitoringStatusSubject.asObservable();
   public medicalRecordCreated$ = this.medicalRecordCreatedSubject.asObservable();
@@ -56,6 +58,7 @@ export class WebsocketService {
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.connectionStatusSubject.next(true);
+      this.connectionStateSubject.next('connected');
     };
 
     this.socket.onmessage = (event) => {
@@ -112,20 +115,25 @@ export class WebsocketService {
       this.isMonitoring = false;
       this.connectionStatusSubject.next(false);
 
-      // Intentar reconectar
-      if (this.reconnectAttempts < this.maxReconnectAttempts) {
-        this.reconnectAttempts++;
-        setTimeout(() => {
-          console.log(`Intentando reconectar... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`);
-          this.connect();
-        }, 2000);
-      }
+      // No emitimos 'disconnected' inmediatamente si vamos a reconectar, 
+      // pero para la UI puede ser útil saber que se cayó.
+      // Emitiremos 'reconnecting' justo antes del timeout.
+
+      // Intentar reconectar infinitamente
+      this.reconnectAttempts++;
+      this.connectionStateSubject.next('reconnecting');
+
+      setTimeout(() => {
+        console.log(`Intentando reconectar... (Intento ${this.reconnectAttempts})`);
+        this.connect();
+      }, 2000);
     };
 
     this.socket.onerror = (error) => {
       console.error('Error en WebSocket:', error);
       this.isConnected = false;
       this.connectionStatusSubject.next(false);
+      // On error usually leads to onclose, so we let onclose handle the reconnection logic
     };
   }
 
@@ -204,11 +212,14 @@ export class WebsocketService {
 
   disconnect(): void {
     if (this.socket) {
+      // Prevent reconnection loop when manually disconnecting
+      this.socket.onclose = null;
       this.socket.close();
       this.socket = null;
       this.isConnected = false;
       this.isMonitoring = false;
       this.connectionStatusSubject.next(false);
+      this.connectionStateSubject.next('disconnected');
       this.monitoringStatusSubject.next(false);
     }
   }

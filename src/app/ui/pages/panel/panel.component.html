@@ -45,9 +45,24 @@
     <!-- Estado de WebSocket -->
     <div class="mt-6 p-3 bg-gray-50 rounded-lg">
       <h3 class="font-semibold mb-2">Estado de Conexión</h3>
-      <div class="flex items-center space-x-2">
-        <div class="w-3 h-3 rounded-full" [class]="isConnected ? 'bg-green-500' : 'bg-red-500'"></div>
-        <span class="text-sm">{{ isConnected ? 'Conectado' : 'Desconectado' }}</span>
+      <div class="flex items-center space-x-2" [ngSwitch]="connectionState">
+        <!-- Conectado -->
+        <ng-container *ngSwitchCase="'connected'">
+          <div class="w-3 h-3 rounded-full bg-green-500"></div>
+          <span class="text-sm">Conectado</span>
+        </ng-container>
+        
+        <!-- Reconectando -->
+        <ng-container *ngSwitchCase="'reconnecting'">
+          <div class="w-3 h-3 rounded-full bg-yellow-500 animate-pulse"></div>
+          <span class="text-sm text-yellow-600 font-medium">Reconectando...</span>
+        </ng-container>
+
+        <!-- Desconectado (default) -->
+        <ng-container *ngSwitchDefault>
+          <div class="w-3 h-3 rounded-full bg-red-500"></div>
+          <span class="text-sm">Desconectado</span>
+        </ng-container>
       </div>
 
       <!-- Botones de control -->

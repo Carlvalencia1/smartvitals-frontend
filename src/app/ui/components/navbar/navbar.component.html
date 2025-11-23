@@ -32,23 +32,36 @@
     <a routerLink="/users" routerLinkActive="router-link-active" *ngIf="user?.role === 'admin'">
       <i class="pi pi-users text-2xl"></i>
     </a>
-    <!-- Puedes agregar más íconos/rutas aquí -->
+    
+    <!-- Acciones directas -->
+    <!-- <a (click)="editProfile()" class="cursor-pointer hover:text-gray-200 transition-colors" title="Editar perfil">
+      <i class="pi pi-user-edit text-2xl"></i>
+    </a>
+    <a (click)="logout()" class="cursor-pointer hover:text-gray-200 transition-colors" title="Cerrar sesión">
+      <i class="pi pi-sign-out text-2xl"></i>
+    </a> -->
   </div>
 
   <div class="relative" (click)="toggleMenu()">
-    <div class="flex items-center  rounded-full py-1 px-3 space-x-3 max-w-xs ml-6 cursor-pointer">
-      <img [src]="profileImageUrl" alt="Profile Picture" class="w-10  rounded-full " />
+    <div class="flex items-center rounded-full py-1 px-3 space-x-3 max-w-xs ml-6 cursor-pointer hover:bg-white/20 transition-all duration-200 border border-transparent hover:border-white/30">
+      <img [src]="profileImageUrl" alt="Profile Picture" class="w-10 h-10 rounded-full object-cover border-2 border-white/50" />
       <div class="whitespace-nowrap">
-        <p class="font-semibold text-sm">{{ userFullName }}</p>
-        <p class="text-xs">{{ userRole }}</p>
+        <p class="font-semibold text-sm leading-tight">{{ userFullName }}</p>
+        <p class="text-xs opacity-90">{{ userRole }}</p>
       </div>
+      <i class="pi pi-chevron-down text-sm ml-1 opacity-80"></i>
     </div>
     <!-- Menú desplegable -->
-    <div *ngIf="menuOpen" class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-md z-20">
-      <a (click)="editProfile()" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer"><i
-          class="pi pi-user-edit"></i> Editar perfil</a>
-      <a (click)="logout()" class="block px-4 py-2 text-gray-800 hover:bg-gray-200 cursor-pointer"><i
-          class="pi pi-sign-out"></i> Cerrar sesión</a>
+    <div *ngIf="menuOpen" class="absolute right-0 mt-2 w-56 bg-white shadow-xl rounded-lg z-20 overflow-hidden border border-gray-100 py-1">
+      <a (click)="editProfile()" class="flex items-center px-4 py-3 text-gray-700 hover:bg-gray-50 cursor-pointer transition-colors">
+        <i class="pi pi-user-edit mr-3 text-blue-600"></i> 
+        <span>Editar perfil</span>
+      </a>
+      <div class="h-px bg-gray-100 my-1"></div>
+      <a (click)="logout()" class="flex items-center px-4 py-3 text-red-600 hover:bg-red-50 cursor-pointer transition-colors">
+        <i class="pi pi-sign-out mr-3"></i> 
+        <span>Cerrar sesión</span>
+      </a>
     </div>
   </div>
 </nav>

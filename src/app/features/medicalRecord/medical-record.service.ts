@@ -1,8 +1,9 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { AuthService } from '../../auth/auth.service';
 import { Record } from './models/record';
-import { Observable } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { environment } from '../../../environments/environment';
 import { RecordWithRisks } from './models/record-with-risks';
 import { PatientStadistics } from './models/patient-stadistics';
@@ -15,12 +16,21 @@ export class MedicalRecordService {
 
   constructor(private authService: AuthService, private http: HttpClient) { }
 
+  private handleError(error: HttpErrorResponse) {
+    if (error.status === 404) {
+      return of([]);
+    }
+    return throwError(() => error);
+  }
+
   getDoctorMedicalRecords(doctor_id: number): Observable<Record[]> {
     return this.http.get<Record[]>(`${this.apiUrl}/doctors/${doctor_id}/medicalRecords`, {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
-    });
+    }).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   getPatientMedicalRecords(patient_id: number): Observable<Record[]> {
@@ -28,7 +38,9 @@ export class MedicalRecordService {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
-    });
+    }).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   getPatientMedicalRecordsByRange(patient_id: number, startDate: string, endDate: string): Observable<Record[]> {
@@ -40,7 +52,9 @@ export class MedicalRecordService {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
-    });
+    }).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   getDoctorMedicalRecordsByRange(doctor_id: number, startDate: string, endDate: string): Observable<Record[]> {
@@ -52,7 +66,9 @@ export class MedicalRecordService {
       headers: {
         'Authorization': `Bearer ${this.authService.getToken()}`
       }
-    });
+    }).pipe(
+      catchError(error => this.handleError(error))
+    );
   }
 
   getDoctorStatistics(doctor_id: number): Observable<PatientStadistics> {

@@ -35,6 +35,7 @@ export class PanelComponent implements OnInit, OnDestroy {
   private subscriptions: Subscription[] = [];
   currentUser = {} as User
   isConnected = false;
+  connectionState: string = 'disconnected'; // Estado detallado de la conexión
   isMonitoring = false;
   currentUserId: number = 0;
   alerts: AlertData[] = [];
@@ -424,6 +425,16 @@ export class PanelComponent implements OnInit, OnDestroy {
       )
     );
 
+    // Suscribirse al estado detallado de conexión
+    this.subscriptions.push(
+      this.websocketService.connectionState$.subscribe(
+        state => {
+          this.connectionState = state;
+          console.log('Estado detallado de conexión:', state);
+        }
+      )
+    );
+
     // Suscribirse a datos de sensores
     this.subscriptions.push(
       this.websocketService.sensorData$.subscribe(
@@ -798,9 +809,6 @@ export class PanelComponent implements OnInit, OnDestroy {
   }
 
   clearAllData() {
-    console.log('Limpiando todos los datos...');
-
-    // Limpiar datos en tiempo real
     this.realTimeData = {
       heartRate: null,
       spo2: null,
@@ -808,107 +816,56 @@ export class PanelComponent implements OnInit, OnDestroy {
       bloodPressure: { systolic: null, diastolic: null }
     };
 
-    // Limpiar datos de gráficos Chart.js
-    this.heartRateChartData = {
-      labels: [],
-      datasets: [{
-        label: 'Ritmo Cardíaco (ppm)',
-        data: [],
-        borderColor: '#EC407A',
-        backgroundColor: 'rgba(236, 64, 122, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 3,
-        pointHoverRadius: 6
-      }]
-    };
+    this.heartRateChartData.labels = [];
+    this.heartRateChartData.datasets[0].data = [];
+    this.heartRateChartData = { ...this.heartRateChartData };
 
-    this.spo2ChartData = {
-      labels: [],
-      datasets: [{
-        label: 'Saturación de Oxígeno (%)',
-        data: [],
-        backgroundColor: '#42A5F5',
-        borderColor: '#1976D2',
-        borderWidth: 1
-      }]
-    };
+    this.spo2ChartData.labels = [];
+    this.spo2ChartData.datasets[0].data = [];
+    this.spo2ChartData = { ...this.spo2ChartData };
 
-    this.temperatureChartData = {
-      labels: [],
-      datasets: [{
-        label: 'Temperatura (°C)',
-        data: [],
-        backgroundColor: '#FFA726',
-        borderColor: '#FB8C00',
-        borderWidth: 1
-      }]
-    };
+    this.temperatureChartData.labels = [];
+    this.temperatureChartData.datasets[0].data = [];
+    this.temperatureChartData = { ...this.temperatureChartData };
 
-    this.ecgChartData = {
-      labels: [],
-      datasets: [{
-        label: 'Señal ECG (mV)',
-        data: [],
-        borderColor: '#AB47BC',
-        backgroundColor: 'rgba(171, 71, 188, 0.1)',
-        borderWidth: 2,
-        fill: true,
-        tension: 0.4,
-        pointRadius: 2,
-        pointHoverRadius: 5
-      }]
-    };
+    this.ecgChartData.labels = [];
+    this.ecgChartData.datasets[0].data = [];
+    this.ecgChartData = { ...this.ecgChartData };
 
-    // Limpiar alertas
     this.alerts = [];
-
-    console.log('Datos limpiados correctamente');
   }
 
-  updateChartVisibility(): void {
-    // Resetear todas las visibilidades
-    this.chartVisibility = {
-      heartRate: false,
-      spo2: false,
-      temperature: false,
-      bloodPressure: false,
-      ecg: false
-    };
-
-    // Activar solo los gráficos seleccionados
-    this.selectedCharts.forEach(chart => {
-      if (chart in this.chartVisibility) {
-        (this.chartVisibility as any)[chart] = true;
-      }
-    });
-
-    console.log('Visibilidad de gráficos actualizada:', this.chartVisibility);
+  selectAllCharts() {
+    this.selectedCharts = this.chartOptions.map(option => option.value);
+    this.updateChartVisibility();
   }
 
-  toggleChart(chartType: string): void {
-    const index = this.selectedCharts.indexOf(chartType);
-    if (index > -1) {
-      this.selectedCharts.splice(index, 1);
+  deselectAllCharts() {
+    this.selectedCharts = [];
+    this.updateChartVisibility();
+  }
+
+  toggleChart(chartValue: string) {
+    if (this.selectedCharts.includes(chartValue)) {
+      this.selectedCharts = this.selectedCharts.filter(c => c !== chartValue);
     } else {
-      this.selectedCharts.push(chartType);
+      this.selectedCharts.push(chartValue);
     }
     this.updateChartVisibility();
   }
 
-  isChartVisible(chartType: string): boolean {
-    return this.selectedCharts.includes(chartType);
+  isChartVisible(chartValue: string): boolean {
+    return this.selectedCharts.includes(chartValue);
   }
 
-  selectAllCharts(): void {
-    this.selectedCharts = [...this.chartOptions.map(chart => chart.value)];
-    this.updateChartVisibility();
-  }
-
-  deselectAllCharts(): void {
-    this.selectedCharts = [];
-    this.updateChartVisibility();
+  updateChartVisibility() {
+    this.chartVisibility = {
+      heartRate: this.selectedCharts.includes('heartRate'),
+      spo2: this.selectedCharts.includes('spo2'),
+      temperature: this.selectedCharts.includes('temperature'),
+      bloodPressure: this.selectedCharts.includes('bloodPressure'),
+      ecg: this.selectedCharts.includes('ecg')
+    };
   }
 
   get allChartsSelected(): boolean {
@@ -919,5 +876,3 @@ export class PanelComponent implements OnInit, OnDestroy {
     return this.selectedCharts.length === 0;
   }
 }
-
-
