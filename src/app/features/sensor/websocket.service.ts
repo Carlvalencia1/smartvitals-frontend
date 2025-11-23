@@ -16,6 +16,7 @@ export class WebsocketService {
   private reconnectAttempts = 0;
   // private maxReconnectAttempts = 5; // Removed limit
   private isMonitoring = false;
+  private currentPatientId: number | null = null; // Store current patient ID for resumption
 
   // Observables para datos y alertas
   private sensorDataSubject = new BehaviorSubject<SensorData | null>(null);
@@ -59,6 +60,12 @@ export class WebsocketService {
       this.reconnectAttempts = 0;
       this.connectionStatusSubject.next(true);
       this.connectionStateSubject.next('connected');
+
+      // Resume monitoring if it was active before disconnection
+      if (this.isMonitoring && this.currentPatientId) {
+        console.log('Conexión restablecida. Reanudando monitoreo para paciente:', this.currentPatientId);
+        this.startMeasurement(this.currentPatientId);
+      }
     };
 
     this.socket.onmessage = (event) => {
@@ -112,12 +119,10 @@ export class WebsocketService {
     this.socket.onclose = () => {
       console.log('WebSocket desconectado');
       this.isConnected = false;
-      this.isMonitoring = false;
+      // IMPORTANT: Do NOT set isMonitoring to false here. 
+      // We want to preserve the intent to monitor so we can resume on reconnection.
+      // this.isMonitoring = false; 
       this.connectionStatusSubject.next(false);
-
-      // No emitimos 'disconnected' inmediatamente si vamos a reconectar, 
-      // pero para la UI puede ser útil saber que se cayó.
-      // Emitiremos 'reconnecting' justo antes del timeout.
 
       // Intentar reconectar infinitamente
       this.reconnectAttempts++;
@@ -168,6 +173,9 @@ export class WebsocketService {
         return;
       }
 
+      // Store ID for resumption
+      this.currentPatientId = patientId;
+
       // Determinar el rol del usuario
       const role = user.role === 'doctor' ? 'doctor' : 'paciente';
 
@@ -195,18 +203,21 @@ export class WebsocketService {
   }
 
   stopMeasurement(patientId: number): void {
+    // Update local state regardless of connection status
+    this.isMonitoring = false;
+    this.monitoringStatusSubject.next(false);
+    this.currentPatientId = null; // Clear stored ID
+    console.log('Medición detenida localmente.');
+
     if (this.socket && this.socket.readyState === WebSocket.OPEN) {
       const message = {
         action: 'stop',
         patient_id: patientId
       };
       this.socket.send(JSON.stringify(message));
-
-      this.isMonitoring = false;
-      this.monitoringStatusSubject.next(false);
-      console.log('Medición detenida para paciente:', patientId);
+      console.log('Comando de detener medición enviado al servidor para paciente:', patientId);
     } else {
-      console.error('WebSocket no está conectado');
+      console.warn('WebSocket no conectado, no se pudo enviar comando stop al servidor.');
     }
   }
 
@@ -218,6 +229,7 @@ export class WebsocketService {
       this.socket = null;
       this.isConnected = false;
       this.isMonitoring = false;
+      this.currentPatientId = null;
       this.connectionStatusSubject.next(false);
       this.connectionStateSubject.next('disconnected');
       this.monitoringStatusSubject.next(false);
