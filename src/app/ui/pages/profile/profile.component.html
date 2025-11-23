@@ -15,7 +15,7 @@
         </div>
 
         <div class="image-upload">
-          <p-fileUpload mode="basic" chooseLabel="Cambiar foto" accept="image/*" maxFileSize="1000000"
+          <p-fileUpload mode="basic" chooseLabel="Cambiar foto" accept="image/*"
             (onSelect)="onFileSelect($event)" [auto]="true" chooseIcon="pi pi-camera">
           </p-fileUpload>
         </div>
@@ -115,7 +115,7 @@
       <!-- Botones -->
       <div class="form-actions">
         <p-button type="submit" label="Guardar cambios" icon="pi pi-check" [loading]="isLoading"
-          [disabled]="profileForm.invalid || isLoading">
+          [disabled]="profileForm.invalid || isLoading || !hasChanges">
         </p-button>
 
         <p-button type="button" label="Cancelar" icon="pi pi-times" severity="secondary" [disabled]="isLoading"

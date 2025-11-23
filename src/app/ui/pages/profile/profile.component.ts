@@ -157,12 +157,24 @@ export class ProfileComponent implements OnInit {
         return;
       }
 
-      // Validar tamaño (máximo 1MB)
-      if (file.size > 1000000) {
+      // Validar tamaño (mínimo 10KB, máximo 5MB)
+      const minSize = 10240; // 10KB
+      const maxSize = 5242880; // 5MB
+
+      if (file.size < minSize) {
+        this.messageService.add({
+          severity: 'error',
+          summary: 'Archivo muy pequeño',
+          detail: 'El archivo debe ser mayor a 10KB'
+        });
+        return;
+      }
+
+      if (file.size > maxSize) {
         this.messageService.add({
           severity: 'error',
           summary: 'Archivo muy grande',
-          detail: 'El archivo debe ser menor a 1MB'
+          detail: 'El archivo debe ser menor a 5MB'
         });
         return;
       }
@@ -345,5 +357,34 @@ export class ProfileComponent implements OnInit {
       newValue !== undefined &&
       newValue !== '' &&
       newValue !== currentValue;
+  }
+
+  get hasChanges(): boolean {
+    if (!this.currentUser) return false;
+
+    const formValues = this.profileForm.value;
+
+    // Verificar si hay una nueva imagen seleccionada
+    if (this.selectedFile) return true;
+
+    // Verificar si la contraseña tiene valor (significa que se quiere cambiar)
+    if (formValues.password && formValues.password.trim() !== '') return true;
+
+    // Helpers para normalizar valores
+    const normalizeStr = (val: any) => (val === null || val === undefined) ? '' : String(val);
+    const normalizeBool = (val: any) => !!val;
+    const normalizeNum = (val: any) => (val === null || val === undefined || val === '') ? null : Number(val);
+
+    // Verificar cambios en campos editables
+    if (normalizeStr(formValues.name) !== normalizeStr(this.currentUser.name)) return true;
+    if (normalizeStr(formValues.lastname) !== normalizeStr(this.currentUser.lastname)) return true;
+    if (normalizeStr(formValues.email) !== normalizeStr(this.currentUser.email)) return true;
+    if (normalizeNum(formValues.age) !== normalizeNum(this.currentUser.age)) return true;
+
+    // Verificar gender y pregnant
+    if (normalizeStr(formValues.gender) !== normalizeStr(this.currentUser.gender)) return true;
+    if (normalizeBool(formValues.pregnant) !== normalizeBool(this.currentUser.pregnant)) return true;
+
+    return false;
   }
 }
